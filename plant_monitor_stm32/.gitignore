@@ -1,0 +1,20 @@
+# Build outputs
+Debug/
+Release/
+
+# Object and dependency files
+*.o
+*.d
+
+# Compiled binaries
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+
+# Eclipse/STM32CubeIDE settings
+.settings/
+
+# STM32CubeIDE workspace metadata
+*.launch

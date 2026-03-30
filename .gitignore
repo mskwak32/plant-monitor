@@ -10,3 +10,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.DS_Store
+
+### STM32CubeIDE workspace metadata
+.metadata/
+plant_monitor_stm32/.metadata/
