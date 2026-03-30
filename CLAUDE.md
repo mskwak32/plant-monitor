@@ -27,3 +27,7 @@ See `portfolio_system_architecture.md` for the full parts list and `STM32 Nucleo
 ## Rules
 - Keep STM32 and RPi code strictly separated in their respective folders.
 - STM32: use C/C++ with STM32 HAL. RPi: use Python or C++ for Linux.
+- User is learning embedded systems from scratch. Always explain:
+  - What each code block does
+  - Why it is needed
+  - What happens if it is omitted
