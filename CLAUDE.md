@@ -9,25 +9,26 @@
   - Board: STM32 Nucleo-F103RB (STM32F103RBT6, 128KB Flash, 20KB SRAM)
 - RPi5: VS Code via SSH
 
-## Hardware Components
-See `portfolio_system_architecture.md` for the full parts list and `STM32 Nucleo-F103RB User manual.pdf` for pin mappings. Key components:
-- MCU: STM32 Nucleo-F103RB
-- Soil moisture sensor: SZH-EK106 (analog, ADC)
-- Temp/humidity sensor: RHT-01 (digital, GPIO bit-bang) — see `RHT01.pdf` for protocol details
-- Relay module: 5V 1-ch (LOW-active, controls DC pump) — JQC-3FF-S-Z based
-- Water pump: DC 12V (powered by separate 12V adapter)
-- OLED display: 0.96" I2C SSD1306 — connected to **STM32** (shows soil moisture, threshold, temp/humidity, pump status)
-- RPi5 8GB — web dashboard server only
+## Hardware
+See `portfolio_system_architecture.md` (parts list) and `STM32 Nucleo-F103RB User manual.pdf` (pin mappings).
+- Soil sensor: SZH-EK106 (ADC)
+- Temp/humidity: RHT-01 (GPIO bit-bang) — see `RHT01.pdf`
+- Relay: 5V 1-ch, LOW-active (JQC-3FF-S-Z)
+- Pump: DC 12V
+- OLED: SSD1306 I2C, connected to STM32
+- RPi5 8GB: web dashboard server only
 
-## Git Workflow
+## Git
 - `stm32` branch — STM32 work
 - `rpi` branch — RPi5 work
-- Sync via GitHub
+- Commit messages: focus on change, no week numbers.
+
+## Weekly Summary
+- At the end of each week, create `{N}주차_맥락.md` summarizing the week's work.
+- Use the previous week's file as a format reference.
 
 ## Rules
-- Keep STM32 and RPi code strictly separated in their respective folders.
-- STM32: use C/C++ with STM32 HAL. RPi: use Python or C++ for Linux.
-- User is learning embedded systems from scratch. Always explain:
-  - What each code block does
-  - Why it is needed
-  - What happens if it is omitted
+- STM32 and RPi code must stay in their respective folders.
+- STM32: C/C++ with HAL. RPi: Python or C++.
+- User writes all code. Claude provides explanations and guidance only.
+- User is learning embedded from scratch. For every code block, explain: what it does, why it's needed, what breaks if omitted.

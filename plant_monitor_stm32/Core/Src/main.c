@@ -21,8 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "rht01.h"
 #include <stdio.h>
-#include <string.h>
+
 
 /* USER CODE END Includes */
 
@@ -68,8 +69,8 @@ static void MX_USART2_UART_Init(void);
 #endif
 
 PUTCHAR_PROTOTYPE {
-	HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, HAL_MAX_DELAY);
-	return ch;
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
 }
 
 /* USER CODE END 0 */
@@ -106,35 +107,44 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	HAL_ADCEx_Calibration_Start(&hadc1);
+  // DWT 사이클 카운터 활성화
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
+  HAL_ADCEx_Calibration_Start(&hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
-		// ADC 읽기
-		HAL_ADC_Start(&hadc1);
+  RHT01_Data rht;
+  while (1) {
+    /* 토양 습도센서 */
+    // ADC 읽기
+    HAL_ADC_Start(&hadc1);
+    // 변환 완료까지 대기. HAL_MAX_DELAY-무한정 기다림
+    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+    // 변환된 값 읽기 (0 ~ 4095)
+    uint32_t adc_value = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+    // 전압으로 변환(3.3V / 4095 * adc_value
+    float voltage = adc_value * 3.3f / 4095.0f;
+    // UART 출력
+    printf("Soil ADC: %lu Voltage: %.2fV\r\n", adc_value, voltage);
 
-		// 변환 완료까지 대기. HAL_MAX_DELAY-무한정 기다림
-		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-
-		// 변환된 값 읽기 (0 ~ 4095)
-		uint32_t adc_value = HAL_ADC_GetValue(&hadc1);
-		HAL_ADC_Stop(&hadc1);
-
-		// 전압으로 변환(3.3V / 4095 * adc_value
-		float voltage = adc_value * 3.3f / 4095.0f;
-
-		// UART 출력
-		printf("Soil ADC: %lu Voltage: %.2fV\r\n", adc_value, voltage);
-
-		HAL_Delay(1000);
+    /* RHT01 온습도 센서 */
+    // RHT01_ReadMedian 내부에서 2초 * 5회 = 약 10초 대기함
+    if (RHT01_ReadMedian(&rht) == HAL_OK) {
+      printf("Humidity: %.1f%% Temperature: %.1fC\r\n", 
+        rht.humidity,rht.temperature);
+    } else {
+      printf("RHT01 read failed\r\n");
+    }
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	}
+  }
   /* USER CODE END 3 */
 }
 
@@ -283,13 +293,20 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, RHT01_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RHT01_Pin */
+  GPIO_InitStruct.Pin = RHT01_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(RHT01_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
@@ -318,10 +335,10 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-	/* User can add his own implementation to report the HAL error return state */
-	__disable_irq();
-	while (1) {
-	}
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1) {
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT
@@ -335,8 +352,9 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* User can add his own implementation to report the file name and line
+     number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
+     line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
