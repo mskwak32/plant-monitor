@@ -30,5 +30,5 @@ See `portfolio_system_architecture.md` (parts list) and `STM32 Nucleo-F103RB Use
 ## Rules
 - STM32 and RPi code must stay in their respective folders.
 - STM32: C/C++ with HAL. RPi: Python or C++.
-- User writes all code. Claude provides explanations and guidance only.
+- Claude writes code only when the user explicitly asks. Otherwise, provide explanations and guidance only.
 - User is learning embedded from scratch. For every code block, explain: what it does, why it's needed, what breaks if omitted.

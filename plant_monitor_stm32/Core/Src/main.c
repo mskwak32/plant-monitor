@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "rht01.h"
+#include "soil_sensor.h"
 #include <stdio.h>
 
 
@@ -107,39 +108,35 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  // DWT 사이클 카운터 활성화
+  // DWT 사이클 카운터 활성화 (rht01 us 딜레이용)
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  HAL_ADCEx_Calibration_Start(&hadc1);
+  SoilSensor_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   RHT01_Data rht;
+  SoilSensor_Data soil;
   while (1) {
     /* 토양 습도센서 */
-    // ADC 읽기
-    HAL_ADC_Start(&hadc1);
-    // 변환 완료까지 대기. HAL_MAX_DELAY-무한정 기다림
-    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-    // 변환된 값 읽기 (0 ~ 4095)
-    uint32_t adc_value = HAL_ADC_GetValue(&hadc1);
-    HAL_ADC_Stop(&hadc1);
-    // 전압으로 변환(3.3V / 4095 * adc_value
-    float voltage = adc_value * 3.3f / 4095.0f;
-    // UART 출력
-    printf("Soil ADC: %lu Voltage: %.2fV\r\n", adc_value, voltage);
+    if (SoilSensor_Read(&soil) == HAL_OK) {
+      printf("Soil ADC: %lu Voltage: %.2fV\r\n", soil.adc_value, soil.voltage);
+    } else {
+      printf("Soil sensor read failed\r\n");
+    }
 
     /* RHT01 온습도 센서 */
-    // RHT01_ReadMedian 내부에서 2초 * 5회 = 약 10초 대기함
-    if (RHT01_ReadMedian(&rht) == HAL_OK) {
+    if (RHT01_Read(&rht) == HAL_OK) {
       printf("Humidity: %.1f%% Temperature: %.1fC\r\n", 
         rht.humidity,rht.temperature);
     } else {
       printf("RHT01 read failed\r\n");
     }
+
+    HAL_Delay(5000);
 
     /* USER CODE END WHILE */
 

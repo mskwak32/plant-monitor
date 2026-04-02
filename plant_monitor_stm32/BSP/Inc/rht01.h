@@ -11,9 +11,12 @@ typedef struct {
     float temperature;
 } RHT01_Data;
 
-// 센서 한 번 읽기
+/* 센서 한 번 읽기 */
 HAL_StatusTypeDef RHT01_Read(RHT01_Data *data);
-// 센서 5번 읽어서 중간값
+/*
+센서 5번 읽어서 중간값
+RHT01_ReadMedian 내부에서 2초 * 5회 = 약 10초 대기함
+*/
 HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Data *data);
 
 #endif
