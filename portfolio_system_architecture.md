@@ -74,6 +74,38 @@
 
 **settings**: id, soil_humidity_min, updated_at
 
+### FastAPI 역할 및 데이터 흐름
+
+FastAPI 서버 하나가 UART 수신, DB 저장, API 서빙, HTML 서빙을 모두 담당한다.
+
+```
+STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
+                                │
+웹 대시보드 ──임계값 설정──▶ FastAPI ──UART──▶ STM32
+                                │
+웹 대시보드 ◀──센서데이터 조회──┘ (DB에서 읽어서 JSON 반환)
+```
+
+- **UART 수신**: FastAPI 내부 백그라운드 스레드가 시리얼 포트(`/dev/ttyACM0`)를 상시 읽고, 데이터 수신 시 SQLite에 저장
+- **임계값 송신**: 웹 대시보드에서 `POST /settings/threshold` 호출 → FastAPI가 UART로 STM32에 전달
+- **데이터 조회**: 대시보드 JS가 `GET /sensor/logs` 등 API를 주기적으로 fetch() → FastAPI가 DB에서 읽어 JSON 반환 → Chart.js로 그래프 렌더링
+- **HTML 서빙**: FastAPI가 정적 파일(HTML/CSS/JS)도 직접 서빙 → Flask 불필요
+
+> FastAPI와 Flask는 둘 다 HTML 서빙 + REST API가 가능한 Python 웹 프레임워크다.
+> FastAPI 선택 이유: 자동 Swagger 문서(`/docs`), 타입 힌트 기반 자동 검증, 포트폴리오 완성도.
+
+---
+
+## UART 연결 방식
+
+| 항목 | 내용 |
+|---|---|
+| 연결 방법 | STM32 Nucleo USB → RPi5 USB 2.0 포트 |
+| RPi5 디바이스 | `/dev/ttyACM0` (가상 COM 포트, ST-Link 내장 변환) |
+| 전압 레벨 | USB 경유이므로 레벨 변환 불필요 |
+| 전원 겸용 | USB 한 줄로 전원 공급 + UART 통신 동시 처리 |
+| RPi5 USB 공급 전류 | 포트당 600mA / STM32 소비 200~300mA → 여유 있음 |
+
 ---
 
 ## 부품 목록
