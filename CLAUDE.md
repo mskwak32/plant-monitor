@@ -10,7 +10,6 @@
 - RPi5: VS Code via SSH
 
 ## Hardware
-See `portfolio_system_architecture.md` (parts list) and `STM32 Nucleo-F103RB User manual.pdf` (pin mappings).
 - Soil sensor: SZH-EK106 (ADC)
 - Temp/humidity: RHT-01 (GPIO bit-bang) — see `RHT01.pdf`
 - Relay: 5V 1-ch, LOW-active (JQC-3FF-S-Z)
@@ -18,13 +17,20 @@ See `portfolio_system_architecture.md` (parts list) and `STM32 Nucleo-F103RB Use
 - OLED: SSD1306 I2C, connected to STM32
 - RPi5 8GB: web dashboard server only
 
+## Reference Docs
+Consult these proactively when relevant — do not wait for the user to ask:
+- `system_architecture.md` — overall system architecture, parts list, wiring
+- `stm32f103rb.pdf` — STM32F103RB datasheet (registers, peripherals, electrical specs)
+- `STM32 Nucleo-F103RB User manual.pdf` — Nucleo board pin mapping, jumpers, schematics
+
 ## Git
 - `stm32` branch — STM32 work
 - `rpi` branch — RPi5 work
-- Commit messages: focus on change, no week numbers.
+- Commit message format: `{N}주차: <변경 내용>` (e.g., `5주차: SSD1306 I2C 드라이버 구현`)
+  - Do NOT use conventional commit prefixes (feat:, fix:, chore:, refactor:, etc.)
 
 ## Weekly Summary
-- At the end of each week, create `{N}주차_맥락.md` summarizing the week's work.
+- At the end of each week, create `주차별_맥락/{N}주차_맥락.md` summarizing the week's work.
 - Use the previous week's file as a format reference.
 
 ## Rules

@@ -1,6 +1,7 @@
 # Build outputs
 Debug/
 Release/
+build/
 
 # Object and dependency files
 *.o
@@ -18,3 +19,4 @@ Release/
 
 # STM32CubeIDE workspace metadata
 *.launch
+.metadata/
