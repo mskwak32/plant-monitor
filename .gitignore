@@ -19,3 +19,4 @@ plant_monitor_stm32/.metadata/
 ### STM32 build output
 plant_monitor_stm32/Debug/
 plant_monitor_stm32/Release/
+.claude
