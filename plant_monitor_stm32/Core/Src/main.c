@@ -24,7 +24,7 @@
 #include "rht01.h"
 #include "soil_sensor.h"
 #include <stdio.h>
-
+#include "ssd1306.h"
 
 /* USER CODE END Includes */
 
@@ -117,7 +117,18 @@ int main(void)
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  SoilSensor_Init();
+  SoilSensor_Init(&hadc1);
+
+  HAL_StatusTypeDef oled_status = SSD1306_Init(&hi2c1);
+if (oled_status != HAL_OK) {
+    printf("SSD1306 Init FAILED: %d\r\n", oled_status);
+} else {
+    printf("SSD1306 Init OK\r\n");
+    SSD1306_Clear(SSD1306_BLACK);
+    SSD1306_WriteString(0, 0, "Hello world");
+    SSD1306_WriteString(0, 2, "Temp: 25.3C");
+    SSD1306_Update();
+}
   /* USER CODE END 2 */
 
   /* Infinite loop */

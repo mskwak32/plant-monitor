@@ -30,8 +30,7 @@ Consult these proactively when relevant — do not wait for the user to ask:
   - Do NOT use conventional commit prefixes (feat:, fix:, chore:, refactor:, etc.)
 
 ## Weekly Summary
-- At the end of each week, create `주차별_맥락/{N}주차_맥락.md` summarizing the week's work.
-- Use the previous week's file as a format reference.
+Use `/update-week` to create weekly context at `주차별_맥락/{N}주차_맥락.md`.
 
 ## Rules
 - STM32 and RPi code must stay in their respective folders.

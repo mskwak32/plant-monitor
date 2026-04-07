@@ -153,3 +153,24 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 | 13주 | 마무리 | README, GitHub, 시연 영상 |
 
 ---
+
+## 완성 이후 고도화 작업
+
+### HAL_MAX_DELAY → 유한 타임아웃 + 에러 처리
+
+현재 코드에서 `HAL_MAX_DELAY`(사실상 무한 대기)를 사용하는 곳을 유한 타임아웃과 예외 처리 로직으로 교체해야 한다.
+I2C 노이즈, 센서 미연결 등 하드웨어 이상 시 MCU 전체가 해당 줄에서 멈추는 문제를 방지한다.
+
+| 파일 | 함수 | 현재 | 변경 방향 |
+|------|------|------|-----------|
+| `BSP/Src/ssd1306.c` | `SSD1306_Init` | `HAL_MAX_DELAY` | I2C 전송 시간 기준 타임아웃 (예: 50ms) + `HAL_ERROR` 반환 시 UART 에러 로그 |
+| `BSP/Src/ssd1306.c` | `SSD1306_Update` | `HAL_MAX_DELAY` × 2 | 프레임버퍼 전송 시간 기준 타임아웃 (예: 200ms) + 연속 실패 시 재초기화 시도 |
+| `BSP/Src/soil_sensor.c` | `SoilSensor_Read` | `HAL_MAX_DELAY` | ADC 변환 시간 기준 타임아웃 (예: 10ms) + `HAL_TIMEOUT` 반환 시 에러 카운트 |
+| `Core/Src/main.c` | `__io_putchar` | `HAL_MAX_DELAY` | UART 전송 시간 기준 타임아웃 (예: 10ms) |
+
+**타임아웃 값 산정 기준:**
+- I2C 100kHz, 1바이트 ≈ 90μs → 1025바이트 ≈ 92ms → 200ms 설정 (2배 여유)
+- ADC 변환 ≈ 수십 μs → 10ms 설정
+- UART 115200bps, 1바이트 ≈ 87μs → 10ms 설정
+
+---

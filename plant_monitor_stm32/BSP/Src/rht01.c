@@ -133,6 +133,7 @@ HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
 /*
 5회 읽어서 중간값(median) 변환
 노이즈/노화로 인한 이상값 최소화
+내부에서 2초 * 5회 = 약 10초 대기함
 */
 HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Data *data) {
   float hum[5], temp[5];
