@@ -5,7 +5,7 @@
 - `plant_monitor_rpi/` — Raspberry Pi 5 application (Linux environment)
 
 ## Dev Environment
-- STM32: STM32CubeIDE 2.1.1 on macOS, STM32CubeMX 6.17.0
+- STM32: STM32CubeIDE for Visual Studio Code, STM32CubeMX 6.17.0
   - Board: STM32 Nucleo-F103RB (STM32F103RBT6, 128KB Flash, 20KB SRAM)
 - RPi5: VS Code via SSH
 

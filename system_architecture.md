@@ -112,7 +112,7 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 
 | 부품 | 모델/규격 |
 |---|---|
-| MCU | STM32 Nucleo F103RB |
+| MCU | STM32 Nucleo F103RB-C05 |
 | 토양습도센서 | SZH-EK106 (아날로그 ADC) |
 | 온습도센서 | RHT-01 (디지털 GPIO 비트뱅) |
 | 릴레이 모듈 | 5V 1채널 / LOW 신호 ON (JQC-3FF-S-Z 기반) |
