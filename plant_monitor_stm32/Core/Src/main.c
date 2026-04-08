@@ -21,10 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "rht01.h"
-#include "soil_sensor.h"
+#include "plant_monitor.h"
 #include <stdio.h>
-#include "ssd1306.h"
 
 /* USER CODE END Includes */
 
@@ -51,7 +49,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+static uint8_t soil_threshold = 40;  // 수분 임계값 (%), 6주차에서 UART로 수신해 변경
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,41 +115,14 @@ int main(void)
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  SoilSensor_Init(&hadc1);
-
-  HAL_StatusTypeDef oled_status = SSD1306_Init(&hi2c1);
-if (oled_status != HAL_OK) {
-    printf("SSD1306 Init FAILED: %d\r\n", oled_status);
-} else {
-    printf("SSD1306 Init OK\r\n");
-    SSD1306_Clear(SSD1306_BLACK);
-    SSD1306_WriteString(0, 0, "Hello world");
-    SSD1306_WriteString(0, 2, "Temp: 25.3C");
-    SSD1306_Update();
-}
+  PlantMonitor_Init(&hi2c1, &hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  RHT01_Data rht;
-  SoilSensor_Data soil;
   while (1) {
-    /* 토양 습도센서 */
-    if (SoilSensor_Read(&soil) == HAL_OK) {
-      printf("Soil ADC: %lu Voltage: %.2fV\r\n", soil.adc_value, soil.voltage);
-    } else {
-      printf("Soil sensor read failed\r\n");
-    }
-
-    /* RHT01 온습도 센서 */
-    if (RHT01_Read(&rht) == HAL_OK) {
-      printf("Humidity: %.1f%% Temperature: %.1fC\r\n", 
-        rht.humidity,rht.temperature);
-    } else {
-      printf("RHT01 read failed\r\n");
-    }
-
-    HAL_Delay(5000);
+    PlantMonitor_Run();
+    HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 

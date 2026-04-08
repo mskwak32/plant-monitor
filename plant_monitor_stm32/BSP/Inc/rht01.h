@@ -4,6 +4,7 @@
 #include "main.h"
 
 /*
+온습도센서
 RHT01에서 읽은 결과를 담는 구조체
 */
 typedef struct {

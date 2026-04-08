@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "stm32f1xx_hal_adc.h"
+#include "stm32f1xx_hal_def.h"
 
 /*
  * 토양 수분 센서(SZH-EK106) 드라이버
@@ -14,7 +15,7 @@ typedef struct {
     float    voltage;     /* 전압 (0.0 ~ 3.3V) */
 } SoilSensor_Data;
 
-void SoilSensor_Init(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef SoilSensor_Init(ADC_HandleTypeDef *hadc);
 HAL_StatusTypeDef SoilSensor_Read(SoilSensor_Data *data);
 
 #endif /* BSP_INC_SOIL_SENSOR_H_ */

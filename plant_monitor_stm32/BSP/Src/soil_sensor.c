@@ -1,5 +1,6 @@
 #include "soil_sensor.h"
 #include "stm32f1xx_hal_adc.h"
+#include "stm32f1xx_hal_def.h"
 
 static ADC_HandleTypeDef *hadc_;
 /*
@@ -7,9 +8,9 @@ static ADC_HandleTypeDef *hadc_;
  * STM32F1 ADC는 내부 오프셋 오차가 있어서, 최초 1회 보정이 필요함.
  * 보정하지 않으면 측정값에 최대 ±2LSB 오차가 생길 수 있음.
  */
-void SoilSensor_Init(ADC_HandleTypeDef *hadc) {
+HAL_StatusTypeDef SoilSensor_Init(ADC_HandleTypeDef *hadc) {
     hadc_ = hadc;
-    HAL_ADCEx_Calibration_Start(hadc_);
+    return HAL_ADCEx_Calibration_Start(hadc_);
 }
 
 /*

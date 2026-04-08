@@ -76,6 +76,14 @@ void SSD1306_DrawPixel(uint8_t x, uint8_t y, SSD1306_Color color) {
     }
 }
 
+
+/**
+    프레임버퍼의 (x, page) 위치에 1글자를 그립니다.
+    @param x x 좌표. 한 글자당 6개 차지
+    - 5x8 픽셀 폰트 데이터(font5x8)를 프레임버퍼에 복사.
+    - 범위 체크(경계 검사)를 하므로, 유효한 좌표만 그립니다.
+    - 비인쇄 문자('\n', '\t' 등)는 '?'로 대체합니다.
+ */
 void SSD1306_WriteChar(uint8_t x, uint8_t page, char ch) {
     if(ch < 0x20 || ch > 0x7E) ch = '?';
     if(x + 6 > SSD1306_WIDTH || page >= SSD1306_HEIGHT / SSD1306_PAGE_PIXEL) return;
@@ -89,6 +97,9 @@ void SSD1306_WriteChar(uint8_t x, uint8_t page, char ch) {
     framebuffer_[base + 5] = 0x00; // 글자 사이 1px 여백
 }
 
+/**
+    @param x x좌표. 한 글자당 6개 차지
+*/
 void SSD1306_WriteString(uint8_t x, uint8_t page, const char *str) {
     while(*str && x + 6 <= SSD1306_WIDTH) {
         SSD1306_WriteChar(x, page, *str++);
