@@ -28,7 +28,7 @@ HAL_StatusTypeDef SoilSensor_Read(SoilSensor_Data *data) {
     }
 
     data->adc_value = HAL_ADC_GetValue(hadc_);
-    data->voltage   = data->adc_value * 3.3f / 4095.0f;
+    data->voltage   = data->adc_value * 3.3f / (float)SOIL_SENSOR_ADC_DRY;
 
     HAL_ADC_Stop(hadc_);
     return HAL_OK;

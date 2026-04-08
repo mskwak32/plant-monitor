@@ -35,7 +35,14 @@ void PlantMonitor_Run(void) {
 
   if (SoilSensor_Read(&soil) == HAL_OK) {
     printf("Soil ADC: %lu Voltage: %.2fV\r\n", soil.adc_value, soil.voltage);
-    moisture_pct = (uint8_t)(100 - (soil.adc_value * 100 / 4095));
+
+    if(soil.adc_value >= SOIL_SENSOR_ADC_DRY) {
+        moisture_pct = 0;
+    } else if(soil.adc_value <= SOIL_SENSOR_ADC_WET) {
+        moisture_pct = 100;
+    } else {
+        moisture_pct = (uint8_t)((SOIL_SENSOR_ADC_DRY - soil.adc_value) * 100 / (SOIL_SENSOR_ADC_DRY - SOIL_SENSOR_ADC_WET));
+    }
   } else {
     printf("Soil sensor real failed\r\n");
     moisture_pct = 0;

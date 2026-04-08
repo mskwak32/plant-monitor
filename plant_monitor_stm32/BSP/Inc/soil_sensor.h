@@ -5,6 +5,9 @@
 #include "stm32f1xx_hal_adc.h"
 #include "stm32f1xx_hal_def.h"
 
+#define SOIL_SENSOR_ADC_DRY     4090
+#define SOIL_SENSOR_ADC_WET     1700
+
 /*
  * 토양 수분 센서(SZH-EK106) 드라이버
  * ADC 채널 0 (PA0)을 사용
