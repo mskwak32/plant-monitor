@@ -11,5 +11,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 .DS_Store
-.claude
 .vscode/
+.claude/settings.local.json
