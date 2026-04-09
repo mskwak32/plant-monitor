@@ -6,6 +6,10 @@
 #include "stm32f1xx_hal_i2c.h"
 #include <stdint.h>
 
+/*
+OLED Display SSD1306 드라이버
+*/
+
 #define SSD1306_WIDTH       128     // 가로 픽셀 수
 #define SSD1306_HEIGHT      64      // 세로 픽셀 수
 #define SSD1306_I2C_ADDR    0x78    // I2C 주소

@@ -10,7 +10,7 @@
 
 /*
  * 토양 수분 센서(SZH-EK106) 드라이버
- * ADC 채널 0 (PA0)을 사용
+ * ADC 채널을 사용
  */
 
 typedef struct {

@@ -3,6 +3,7 @@
 #include "soil_sensor.h"
 #include "ssd1306.h"
 #include "stm32f1xx_hal_def.h"
+#include "relay.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -65,18 +66,18 @@ static void OLED_Display(uint8_t soil_moisture_ptc, RHT01_Data *rht) {
 
   SSD1306_Clear(SSD1306_BLACK);
 
-  sprintf(oled_buf, "Soil: %3d%%", soil_moisture_ptc);
+  sprintf(oled_buf, "Soil: %13d%%", soil_moisture_ptc);
   SSD1306_WriteString(0, 0, oled_buf);
 
-  sprintf(oled_buf, "Threashold: %3d%%", soil_threashold);
+  sprintf(oled_buf, "Threashold: %7d%%", soil_threashold);
   SSD1306_WriteString(0, 1, oled_buf);
 
-  sprintf(oled_buf, "Temp:%5.1fC", rht->temperature);
-  SSD1306_WriteString(0, 2, oled_buf);
-
-  sprintf(oled_buf, "Humidity:%5.1f%%", rht->humidity);
+  sprintf(oled_buf, "Temp:%14.1fC", rht->temperature);
   SSD1306_WriteString(0, 3, oled_buf);
 
-  SSD1306_WriteString(0, 4, "Pump: OFF");
+  sprintf(oled_buf, "Humidity:%10.1f%%", rht->humidity);
+  SSD1306_WriteString(0, 4, oled_buf);
+
+  SSD1306_WriteString(0, 6, "Pump: OFF");
   SSD1306_Update();
 }

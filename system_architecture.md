@@ -115,7 +115,7 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 | MCU | STM32 Nucleo F103RB-C05 |
 | 토양습도센서 | SZH-EK106 (아날로그 ADC) |
 | 온습도센서 | RHT-01 (디지털 GPIO 비트뱅) |
-| 릴레이 모듈 | 5V 1채널 / LOW 신호 ON (JQC-3FF-S-Z 기반) |
+| 릴레이 모듈 | 5V 1채널 / HIGH 신호 ON (JQC-3FF-S-Z 기반, 실측 확인) |
 | 워터펌프 | DC12V 수중펌프 (외경8mm 내경6mm) |
 | 실리콘 호스 | 외경10mm 내경8mm |
 | OLED 디스플레이 | 0.96인치 I2C SSD1306 / **STM32에 연결** |
