@@ -115,13 +115,13 @@ int main(void)
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  PlantMonitor_Init(&hi2c1, &hadc1);
+  PlantMonitor_Init(RHT01_GPIO_Port, RHT01_Pin, &hi2c1, &hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    PlantMonitor_Run();
+    PlantMonitor_Run(soil_threshold);
     HAL_Delay(2000);
 
     /* USER CODE END WHILE */

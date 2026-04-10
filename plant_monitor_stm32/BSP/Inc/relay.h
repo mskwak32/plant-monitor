@@ -1,7 +1,7 @@
 #ifndef BSP_INC_RELAY_H_
 #define BSP_INC_RELAY_H_
 
-#include "stm32f103xb.h"
+#include "stm32f1xx_hal.h"
 #include <stdint.h>
 
 /*

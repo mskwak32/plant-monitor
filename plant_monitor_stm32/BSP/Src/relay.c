@@ -1,5 +1,4 @@
 #include "relay.h"
-#include "stm32f1xx_hal_gpio.h"
 
 void Relay_Init(Relay_Handle *relay, GPIO_TypeDef *port, uint16_t pin) {
     relay->port = port;

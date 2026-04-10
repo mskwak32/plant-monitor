@@ -1,81 +1,54 @@
 #include "rht01.h"
 
-/*
- * GPIO를 Output 모드로 전환.
- * Start Signal 전송 시 MCU가 라인을 직접 제어해야함
- */
-static void Set_Output(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = RHT01_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(RHT01_GPIO_Port, &GPIO_InitStruct);
-}
+static void Set_Output(GPIO_TypeDef *port, uint16_t pin);
+static void Set_Input(GPIO_TypeDef *port, uint16_t pin);
+static void delay_us(uint32_t us);
 
-/*
- *	GPIO를 Input 모드로 전환(내부 풀업)
- *	데이터 수신시 센서가 라인을 제어
- */
-static void Set_Input(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = RHT01_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(RHT01_GPIO_Port, &GPIO_InitStruct);
-}
-
-/*
- * micro second(us)단위의 딜레이
- * HAL_Delay()는 ms 단위라 RHT01 타이밍(수십us)에 쓸 수 없음
- * 		DWT->CYCCNT: Cpu 클럭마다 1씩 증가하는 하드웨어 카운터
- * 		72MHz -> 1us = 72 ticks
- */
-static void delay_us(uint32_t us) {
-  uint32_t start = DWT->CYCCNT;
-  uint32_t ticks = us * (SystemCoreClock / 1000000U);
-  // 뺄셈방식 : CYCCNT가 overflow 되어도 올바르게 동작
-  while ((DWT->CYCCNT - start) < ticks)
-    ;
+void RHT01_Init(RHT01_Handle *handle, GPIO_TypeDef *port, uint16_t pin) {
+  handle->port = port;
+  handle->pin = pin;
 }
 
 /*
  * RHT01 1회 읽기
  */
-HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
+HAL_StatusTypeDef RHT01_Read(RHT01_Handle *handle) {
   uint8_t bits[40] = {0};
   uint32_t timeout;
+  GPIO_TypeDef *port = handle->port;
+  uint16_t pin = handle->pin;
 
   // Step 1: Start signal
   // 5ms LOW -> 30us HIGH
-  Set_Output();
-  HAL_GPIO_WritePin(RHT01_GPIO_Port, RHT01_Pin, GPIO_PIN_RESET);
+  Set_Output(port, pin);
+  HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
   HAL_Delay(5);
 
-  HAL_GPIO_WritePin(RHT01_GPIO_Port, RHT01_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
   delay_us(30);
 
   // Step 2: Check sensor response
   // 센서가 80us LOW -> 80us HIGH로 응답
   // timeout: 센서 고장/미연결 시 무한 루프 방지
-  Set_Input();
+  Set_Input(port, pin);
 
   // LOW 기다림
   timeout = 10000;
-  while (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_SET) {
+  while (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_SET) {
     if (--timeout == 0)
       return HAL_ERROR;
   }
 
   // LOW 구간(80us) 끝나길 기다림
   timeout = 10000;
-  while (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_RESET) {
+  while (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET) {
     if (--timeout == 0)
       return HAL_ERROR;
   }
 
   // HIGH 구간(80us) 끝나길 기다림 -> 이후 데이터 전송 시작
   timeout = 10000;
-  while (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_SET) {
+  while (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_SET) {
     if (--timeout == 0)
       return HAL_ERROR;
   }
@@ -87,7 +60,7 @@ HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
   for (int i = 0; i < 40; i++) {
     // 50us LOW 구간이 끝나길 기다림(매 비트 공통)
     timeout = 10000;
-    while (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_RESET) {
+    while (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET) {
       if (--timeout == 0)
         return HAL_ERROR;
     }
@@ -95,11 +68,11 @@ HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
     // 40us 후 라인 상태로 비트 판별
     delay_us(40);
     bits[i] =
-        (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_SET) ? 1 : 0;
+        (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_SET) ? 1 : 0;
 
     // HIGH 구간이 끝나길 기다려야 다음 비트 시작 가능
     timeout = 10000;
-    while (HAL_GPIO_ReadPin(RHT01_GPIO_Port, RHT01_Pin) == GPIO_PIN_SET) {
+    while (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_SET) {
       if (--timeout == 0)
         return HAL_ERROR;
     }
@@ -119,12 +92,12 @@ HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
     return HAL_ERROR;
 
   // Step 6: 데이터 변환
-  data->humidity = bytes[0] + bytes[1] * 0.1f;
+  handle->data.humidity = bytes[0] + bytes[1] * 0.1f;
   // 온도 MSB(최상위비트)가 1이면 영하
   if (bytes[2] & 0x80) {
-    data->temperature = -((bytes[2] & 0x7F) + bytes[3] * 0.1f);
+    handle->data.temperature = -((bytes[2] & 0x7F) + bytes[3] * 0.1f);
   } else {
-    data->temperature = bytes[2] + bytes[3] * 0.1f;
+    handle->data.temperature = bytes[2] + bytes[3] * 0.1f;
   }
 
   return HAL_OK;
@@ -135,15 +108,14 @@ HAL_StatusTypeDef RHT01_Read(RHT01_Data *data) {
 노이즈/노화로 인한 이상값 최소화
 내부에서 2초 * 5회 = 약 10초 대기함
 */
-HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Data *data) {
+HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Handle *handle) {
   float hum[5], temp[5];
   int valid = 0;
 
   for (int i = 0; i < 5; i++) {
-    RHT01_Data d;
-    if (RHT01_Read(&d) == HAL_OK) {
-      hum[valid] = d.humidity;
-      temp[valid] = d.temperature;
+    if (RHT01_Read(handle) == HAL_OK) {
+      hum[valid] = handle->data.humidity;
+      temp[valid] = handle->data.temperature;
       valid++;
     }
 
@@ -169,8 +141,45 @@ HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Data *data) {
     }
   }
 
-  data->humidity = hum[valid / 2];
-  data->temperature = temp[valid / 2];
+  handle->data.humidity = hum[valid / 2];
+  handle->data.temperature = temp[valid / 2];
 
   return HAL_OK;
+}
+
+/*
+ * GPIO를 Output 모드로 전환.
+ * Start Signal 전송 시 MCU가 라인을 직접 제어해야함
+ */
+static void Set_Output(GPIO_TypeDef *port, uint16_t pin) {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(port, &GPIO_InitStruct);
+}
+
+/*
+ *	GPIO를 Input 모드로 전환(내부 풀업)
+ *	데이터 수신시 센서가 라인을 제어
+ */
+static void Set_Input(GPIO_TypeDef *port, uint16_t pin) {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(port, &GPIO_InitStruct);
+}
+
+/*
+ * micro second(us)단위의 딜레이
+ * HAL_Delay()는 ms 단위라 RHT01 타이밍(수십us)에 쓸 수 없음
+ * 		DWT->CYCCNT: Cpu 클럭마다 1씩 증가하는 하드웨어 카운터
+ * 		72MHz -> 1us = 72 ticks
+ */
+static void delay_us(uint32_t us) {
+  uint32_t start = DWT->CYCCNT;
+  uint32_t ticks = us * (SystemCoreClock / 1000000U);
+  // 뺄셈방식 : CYCCNT가 overflow 되어도 올바르게 동작
+  while ((DWT->CYCCNT - start) < ticks);
 }

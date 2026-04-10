@@ -1,5 +1,4 @@
 #include "ssd1306_font.h"
-#include <stdint.h>
 
 // 한 글자를 세로 방향으로 슬라이스한 5개의 열(column) 데이터
 // 5x8 : 가로 픽셀 수 5(column), 세로 픽셀 수 8(row)
