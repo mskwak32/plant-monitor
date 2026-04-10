@@ -12,7 +12,7 @@
 ## Hardware
 - Soil sensor: SZH-EK106 (ADC)
 - Temp/humidity: RHT-01 (GPIO bit-bang) — see `RHT01.pdf`
-- Relay: 5V 1-ch, LOW-active (JQC-3FF-S-Z)
+- Relay: 5V 1-ch, HIGH-active (JQC-3FF-S-Z)
 - Pump: DC 12V
 - OLED: SSD1306 I2C, connected to STM32
 - RPi5 8GB: web dashboard server only
@@ -28,9 +28,6 @@ Consult these proactively when relevant — do not wait for the user to ask:
 - `rpi` branch — RPi5 work
 - Commit message format: `{N}주차: <변경 내용>` (e.g., `5주차: SSD1306 I2C 드라이버 구현`)
   - Do NOT use conventional commit prefixes (feat:, fix:, chore:, refactor:, etc.)
-
-## Weekly Summary
-Use `/update-week` to create weekly context at `주차별_맥락/{N}주차_맥락.md`.
 
 ## Rules
 - STM32 and RPi code must stay in their respective folders.

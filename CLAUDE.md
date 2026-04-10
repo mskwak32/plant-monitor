@@ -29,9 +29,6 @@ Consult these proactively when relevant — do not wait for the user to ask:
 - Commit message format: `{N}주차: <변경 내용>` (e.g., `5주차: SSD1306 I2C 드라이버 구현`)
   - Do NOT use conventional commit prefixes (feat:, fix:, chore:, refactor:, etc.)
 
-## Weekly Summary
-Use `/update-week` to create weekly context at `주차별_맥락/{N}주차_맥락.md`.
-
 ## Rules
 - STM32 and RPi code must stay in their respective folders.
 - STM32: C/C++ with HAL. RPi: Python or C++.
