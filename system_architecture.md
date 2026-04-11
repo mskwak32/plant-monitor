@@ -53,7 +53,7 @@ App/plant_monitor
   ├─ 전체 STM32 앱 흐름 제어
   ├─ SensorMonitor_Init/Run 호출
   ├─ OLED 표시
-  └─ 이후 watering_controller, 부팅 상태 체크 조립 예정
+  └─ 이후 watering_controller 조립 예정
 
 App/sensor_monitor
   ├─ SoilSensor_Handle / RHT01_Handle 보관
@@ -204,6 +204,13 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 ---
 
 ## 완성 이후 고도화 작업
+
+### 부팅 시 부품 상태 체크
+
+센서, OLED, 릴레이 상태를 부팅 시 확인하고 OLED에 결과를 표시한다.
+상태 체크 결과 표시 후 약 10초 대기하고 메인 루프 동작을 시작한다.
+
+이 작업은 기본 센서 읽기, OLED 표시, 릴레이 제어, 자동 급수 로직이 완성된 뒤 안정화 단계에서 추가한다.
 
 ### HAL_MAX_DELAY → 유한 타임아웃 + 에러 처리
 
