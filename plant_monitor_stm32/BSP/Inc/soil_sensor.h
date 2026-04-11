@@ -16,6 +16,7 @@
 typedef struct {
     uint32_t adc_value;   /* 원시 ADC 값 (0 ~ 4095) */
     float    voltage;     /* 전압 (0.0 ~ 3.3V) */
+    uint8_t  moisture_pct;/* 토양 수분 비율 (0 ~ 100%) */
 } SoilSensor_Data;
 
 typedef struct {

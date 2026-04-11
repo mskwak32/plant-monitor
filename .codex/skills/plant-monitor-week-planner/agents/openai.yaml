@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plant Monitor Week Planner"
+  short_description: "Plan weekly Plant Monitor work from project context"
+  default_prompt: "Use $plant-monitor-week-planner to start 5주차 for the plant-monitor project."

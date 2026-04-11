@@ -115,7 +115,7 @@ int main(void)
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  PlantMonitor_Init(RHT01_GPIO_Port, RHT01_Pin, &hi2c1, &hadc1);
+  PlantMonitor_Init(AIR_SENSOR_GPIO_Port, AIR_SENSOR_Pin, &hi2c1, &hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -310,7 +310,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, RHT01_Pin|LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, AIR_SENSOR_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(WATER_PUMP_GPIO_Port, WATER_PUMP_Pin, GPIO_PIN_RESET);
@@ -321,12 +321,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : RHT01_Pin */
-  GPIO_InitStruct.Pin = RHT01_Pin;
+  /*Configure GPIO pin : AIR_SENSOR_Pin */
+  GPIO_InitStruct.Pin = AIR_SENSOR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(RHT01_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(AIR_SENSOR_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;

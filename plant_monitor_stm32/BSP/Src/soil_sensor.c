@@ -35,6 +35,16 @@ HAL_StatusTypeDef SoilSensor_Read(SoilSensor_Handle *handle) {
 
   handle->data.adc_value = HAL_ADC_GetValue(handle->hadc);
   handle->data.voltage = handle->data.adc_value * 3.3f / (float)SOIL_SENSOR_ADC_MAX;
+  
+  if (handle->data.adc_value >= handle->adc_dry) {
+    handle->data.moisture_pct = 0;
+  } else if (handle->data.adc_value <= handle->adc_wet) {
+    handle->data.moisture_pct = 100;
+  } else {
+    handle->data.moisture_pct =
+        (uint8_t)((handle->adc_dry - handle->data.adc_value) * 100 /
+                  (handle->adc_dry - handle->adc_wet));
+  }
 
   HAL_ADC_Stop(handle->hadc);
   return HAL_OK;

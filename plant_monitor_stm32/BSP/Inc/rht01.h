@@ -19,7 +19,7 @@ typedef struct {
     RHT01_Data data;
 } RHT01_Handle;
 
-void RHT01_Init(RHT01_Handle *handle, GPIO_TypeDef *port, uint16_t pin);
+HAL_StatusTypeDef RHT01_Init(RHT01_Handle *handle, GPIO_TypeDef *port, uint16_t pin);
 HAL_StatusTypeDef RHT01_Read(RHT01_Handle *handle);
 HAL_StatusTypeDef RHT01_ReadMedian(RHT01_Handle *handle);
 

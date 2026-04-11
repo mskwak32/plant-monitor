@@ -4,9 +4,10 @@ static void Set_Output(GPIO_TypeDef *port, uint16_t pin);
 static void Set_Input(GPIO_TypeDef *port, uint16_t pin);
 static void delay_us(uint32_t us);
 
-void RHT01_Init(RHT01_Handle *handle, GPIO_TypeDef *port, uint16_t pin) {
+HAL_StatusTypeDef RHT01_Init(RHT01_Handle *handle, GPIO_TypeDef *port, uint16_t pin) {
   handle->port = port;
   handle->pin = pin;
+  return HAL_OK;
 }
 
 /*

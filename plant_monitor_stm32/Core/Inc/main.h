@@ -62,8 +62,8 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define WATER_SENSOR_ADC_Pin GPIO_PIN_0
 #define WATER_SENSOR_ADC_GPIO_Port GPIOA
-#define RHT01_Pin GPIO_PIN_1
-#define RHT01_GPIO_Port GPIOA
+#define AIR_SENSOR_Pin GPIO_PIN_1
+#define AIR_SENSOR_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3

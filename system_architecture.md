@@ -36,6 +36,55 @@
 | 프론트 | 웹 대시보드 | 실시간 조회, 그래프, 펌프 이력, 임계값 원격 설정 / HTML+CSS+JS, Chart.js (FastAPI에서 서빙) |
 | 네트워크 | Wi-Fi 내부망 | 같은 네트워크 내 웹 브라우저로 접속 (인증 없음) |
 
+### STM32 펌웨어 내부 구조
+
+STM32 펌웨어는 CubeMX가 생성한 `Core` 코드 위에 `BSP` 드라이버 계층과 `App` 서비스 계층을 올리는 구조로 정리한다.
+
+```
+Core/main.c
+  ├─ HAL_Init(), SystemClock_Config()
+  ├─ MX_GPIO_Init(), MX_ADC1_Init(), MX_I2C1_Init(), MX_USART2_UART_Init()
+  ├─ DWT cycle counter enable (RHT-01 us delay)
+  ├─ PlantMonitor_Init(...)
+  └─ while (1)
+       └─ PlantMonitor_Run(...)
+
+App/plant_monitor
+  ├─ 전체 STM32 앱 흐름 제어
+  ├─ SensorMonitor_Init/Run 호출
+  ├─ OLED 표시
+  └─ 이후 watering_controller, 부팅 상태 체크 조립 예정
+
+App/sensor_monitor
+  ├─ SoilSensor_Handle / RHT01_Handle 보관
+  ├─ 센서 초기화 상태 취합
+  ├─ 토양습도센서 + 온습도센서 읽기
+  └─ 최신 센서값을 SensorMonitor_Data로 제공
+
+App/watering_controller (예정)
+  ├─ 릴레이를 통해 워터펌프 제어
+  ├─ 임계값 기반 자동 급수 판단
+  └─ IDLE / PUMPING / SOAKING 상태 머신 관리
+
+BSP
+  ├─ soil_sensor: ADC 기반 토양습도센서 드라이버, raw ADC/전압/수분 % 계산
+  ├─ rht01: GPIO bit-bang 온습도센서 드라이버
+  ├─ ssd1306: I2C OLED 드라이버
+  └─ relay: HIGH-active 릴레이 GPIO 드라이버
+```
+
+현재 설계 원칙:
+
+| 계층 | 역할 |
+|---|---|
+| `Core/main.c` | CubeMX/HAL 초기화와 앱 진입점 |
+| `BSP/*` | 개별 하드웨어를 직접 다루는 재사용 가능한 드라이버 |
+| `App/sensor_monitor` | 센서 드라이버들을 묶어 최신 센서 데이터를 제공 |
+| `App/plant_monitor` | STM32 앱 전체 흐름을 조립 |
+| `App/watering_controller` | 자동 급수 정책과 non-blocking 상태 머신 담당 예정 |
+
+자동 급수는 RTOS 없이 `HAL_GetTick()` 기반 non-blocking 상태 머신으로 구현한다. 펌프 ON 시간과 물 흡수 대기 시간 동안에도 센서 모니터링, OLED 표시, UART 처리 흐름이 멈추지 않도록 긴 `HAL_Delay()` 사용은 피한다.
+
 ### OLED 표시 항목 (STM32 — SSD1306 I2C)
 
 현장에서 한눈에 파악할 수 있는 핵심 정보만 표시:

@@ -1,10 +1,10 @@
 Update the weekly context file at `주차별_맥락/{N}주차_맥락.md`.
 
-## Week Selection
+## Input
 
-- Use `$ARGUMENTS` as the week number when provided.
-- Example: `/update-week 5` means `5주차`.
-- If `$ARGUMENTS` is missing, read `개발_일정_체크리스트.md` and determine the current in-progress week automatically.
+- If the user includes a week number, use it as `{N}`.
+- If no week number is provided, read `개발_일정_체크리스트.md` and determine the current in-progress week automatically.
+- Treat the user's latest message as the command input; do not rely on Claude-specific command arguments.
 
 ## Run
 
