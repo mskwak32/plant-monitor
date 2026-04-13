@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
     I2C_HandleTypeDef *hi2c;
     uint8_t i2c_addr;
-    uint8_t framebuffer[SSD1306_WIDTH * SSD1306_HEIGHT / SSD1306_PAGE_PIXEL];     /**< 128x64 / 8 = 1024bytes */
+    uint8_t framebuffer[SSD1306_WIDTH * SSD1306_HEIGHT / SSD1306_PAGE_PIXEL];     // 128x64 / 8 = 1024bytes
 } SSD1306_Handle;
 
 HAL_StatusTypeDef SSD1306_Init(SSD1306_Handle *handle, I2C_HandleTypeDef *hi2c, uint8_t addr);

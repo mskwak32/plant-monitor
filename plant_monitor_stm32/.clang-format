@@ -1,0 +1,5 @@
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 100
+AlignAfterOpenBracket: AlwaysBreak   # 여는 괄호 뒤에서 항상 줄바꿈
+BinPackParameters: false             # 파라미터를 한 줄씩 나열

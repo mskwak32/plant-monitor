@@ -60,7 +60,7 @@ App/sensor_monitor
   ├─ 토양습도센서 + 온습도센서 읽기
   └─ 최신 센서값을 SensorMonitor_Data로 제공
 
-App/watering_controller (예정)
+App/water_pump (예정)
   ├─ 릴레이를 통해 워터펌프 제어
   ├─ 임계값 기반 자동 급수 판단
   └─ IDLE / PUMPING / SOAKING 상태 머신 관리
@@ -80,7 +80,7 @@ BSP
 | `BSP/*`                   | 개별 하드웨어를 직접 다루는 재사용 가능한 드라이버 |
 | `App/sensor_monitor`      | 센서 드라이버들을 묶어 최신 센서 데이터를 제공     |
 | `App/plant_monitor`       | STM32 앱 전체 흐름을 조립                          |
-| `App/watering_controller` | 자동 급수 정책과 non-blocking 상태 머신 담당 예정  |
+| `App/water_pump`          | 자동 급수 정책과 non-blocking 상태 머신 담당 예정  |
 
 자동 급수는 RTOS 없이 `HAL_GetTick()` 기반 non-blocking 상태 머신으로 구현한다. 펌프 ON 시간과 물 흡수 대기 시간 동안에도 센서 모니터링, OLED 표시, UART 처리 흐름이 멈추지 않도록 긴 `HAL_Delay()` 사용은 피한다.
 

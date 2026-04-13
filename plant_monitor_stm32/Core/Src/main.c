@@ -49,7 +49,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-static uint8_t soil_threshold = 40;  // 수분 임계값 (%), 6주차에서 UART로 수신해 변경
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,13 +115,13 @@ int main(void)
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  PlantMonitor_Init(AIR_SENSOR_GPIO_Port, AIR_SENSOR_Pin, &hi2c1, &hadc1);
+  PlantMonitor_Init(AIR_SENSOR_GPIO_Port, AIR_SENSOR_Pin, &hi2c1, &hadc1, WATER_PUMP_GPIO_Port, WATER_PUMP_Pin);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    PlantMonitor_Run(soil_threshold);
+    PlantMonitor_Run();
     HAL_Delay(2000);
 
     /* USER CODE END WHILE */

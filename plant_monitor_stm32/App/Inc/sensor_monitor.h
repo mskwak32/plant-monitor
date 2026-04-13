@@ -10,7 +10,7 @@ typedef struct {
 } SensorMonitor_Status;
 
 typedef struct {
-    uint8_t soil_moisture_pct;  /**< 토양습도 퍼센트 */
+    uint8_t soil_moisture_pct;  // 토양습도 퍼센트
     float air_humidity;
     float air_temperature;
 } SensorMonitor_Data;
