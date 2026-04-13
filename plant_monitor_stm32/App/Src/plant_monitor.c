@@ -4,6 +4,7 @@
 
 #include "sensor_monitor.h"
 #include "ssd1306.h"
+#include "stm32f1xx_hal.h"
 #include "water_pump.h"
 
 static SSD1306_Handle oled_handle;
@@ -55,6 +56,8 @@ void PlantMonitor_Run(void) {
         soil_threshold,
         WaterPump_GetState(&pump_handle)
     );
+
+    HAL_Delay(2000);
 }
 
 static void OLED_Display(

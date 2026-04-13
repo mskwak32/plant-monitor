@@ -122,7 +122,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
     PlantMonitor_Run();
-    HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
