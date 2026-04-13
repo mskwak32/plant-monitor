@@ -1,34 +1,39 @@
 {
   "weekly": {
     "주차별_맥락/1주차_맥락.md": {
-      "last_mtime": 1775567345,
-      "content_hash": "abc59b399e96a84c0097e00e7cd8b82df38f3f2c46e1050fb49fc97cad713f29",
+      "last_mtime": 1776064105,
+      "content_hash": "ffb50b4d1480fbc3aa0b6a4cc35feccad35c97b02172d633a3867a149bbb0494",
       "notion_page_id": "33b6e29b-97d5-818f-8605-ca9902b81d26"
     },
     "주차별_맥락/2주차_맥락.md": {
-      "last_mtime": 1775566030,
-      "content_hash": "d926694dc6c1b2438114a13b7acddab4058a13a6c4f40681061bf28405ea1585",
+      "last_mtime": 1776064105,
+      "content_hash": "ccf9579eae5948d1c195e5d43f9d5c60fd45b3fdd3cef72aa59529e9399a5232",
       "notion_page_id": "33b6e29b-97d5-81a6-928b-eda833ca7dbd"
     },
     "주차별_맥락/3주차_맥락.md": {
-      "last_mtime": 1775570589,
-      "content_hash": "aa8b1e7209ddd279f999a205652fc5fb166042078515715b30003ec31178f907",
+      "last_mtime": 1776064105,
+      "content_hash": "540410e6e74c9badef682d6a45a647f6a1f13ad72144d820032538b9d6ea23c2",
       "notion_page_id": "3386e29b-97d5-8139-8af8-f94cdb005fd6"
     },
     "주차별_맥락/4주차_맥락.md": {
-      "last_mtime": 1775292267,
-      "content_hash": "a5a8f988a4bb0d95810c2f44250e9b253619736f33680e41b7d47c9a364f42a5",
+      "last_mtime": 1776064105,
+      "content_hash": "165c184d2a09610f79e0be22ab9b57c53000adcf02eeaeaf7c20e0f9922ea2b5",
       "notion_page_id": "3386e29b-97d5-816d-97af-efadcf04c912"
     },
     "주차별_맥락/5주차_맥락.md": {
-      "last_mtime": 1775642148,
-      "content_hash": "0a0a7a7e92b1950f2054a3b36a39a28c2b2de6d5f2499b9018d18246d7874e17",
+      "last_mtime": 1776064105,
+      "content_hash": "8db81bf366e053f857b2e8d706b48ea24b96ff23b7444a2366177c855863cc77",
       "notion_page_id": "33c6e29b-97d5-8101-b595-d01652e5bc33"
+    },
+    "주차별_맥락/6주차_맥락.md": {
+      "last_mtime": 1776070500,
+      "content_hash": "be181ef9444348c0735bfc4631dbdd0f74caca1170f2d77877b1bdc4ae94ec7b",
+      "notion_page_id": "3416e29b-97d5-8154-b6aa-fe04f324b12b"
     }
   },
   "architecture": {
-    "last_mtime": 1775895883,
-    "content_hash": "f8049ee9d3902f96fce4324d2acaa75546d190f015b04423b69f2aea6c3a5f30",
+    "last_mtime": 1776069154,
+    "content_hash": "b240914d02ee29fa213dc384849bda19249591c2f4eda1a359e6d9cd2e44e57b",
     "notion_page_id": "3386e29b-97d5-814b-96f0-e5e4515e58c7"
   }
 }
