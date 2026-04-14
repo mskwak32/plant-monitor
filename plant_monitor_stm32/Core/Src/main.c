@@ -72,7 +72,7 @@ static void MX_I2C1_Init(void);
 
 PUTCHAR_PROTOTYPE {
   HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-  return ch;
+    return ch;
 }
 
 /* USER CODE END 0 */
@@ -110,23 +110,30 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  // DWT 사이클 카운터 활성화 (rht01 us 딜레이용)
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  DWT->CYCCNT = 0;
-  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    // DWT 사이클 카운터 활성화 (rht01 us 딜레이용)
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-  PlantMonitor_Init(AIR_SENSOR_GPIO_Port, AIR_SENSOR_Pin, &hi2c1, &hadc1, WATER_PUMP_GPIO_Port, WATER_PUMP_Pin);
+    PlantMonitor_Init(
+        AIR_SENSOR_GPIO_Port, 
+        AIR_SENSOR_Pin,
+        &hi2c1,
+        &hadc1,
+        WATER_PUMP_GPIO_Port,
+        WATER_PUMP_Pin,
+        &huart2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1) {
-    PlantMonitor_Run();
+    while (1) {
+        PlantMonitor_Run();
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -361,10 +368,10 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1) {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1) {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT
@@ -378,9 +385,9 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line
-     number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
-     line) */
+    /* User can add his own implementation to report the file name and line
+       number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
+       line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

@@ -10,7 +10,8 @@ void PlantMonitor_Init(
     I2C_HandleTypeDef *hi2c,
     ADC_HandleTypeDef *hadc,
     GPIO_TypeDef *water_pump_gpio_port,
-    uint16_t water_pump_gpio_pin
+    uint16_t water_pump_gpio_pin,
+    UART_HandleTypeDef *huart
 );
 void PlantMonitor_Run(void);
 

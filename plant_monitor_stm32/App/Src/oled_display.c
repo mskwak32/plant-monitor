@@ -1,4 +1,6 @@
 #include "oled_display.h"
+#include <stdio.h>
+#include "ssd1306.h"
 
 #define OLED_DISPLAY_INTERVAL_MS 1000U
 
@@ -18,7 +20,7 @@ void OledDisplay_Init(I2C_HandleTypeDef* hi2c) {
 
 void OledDisplay_Display(
     uint8_t soil_moisture_pct,
-    float air_himidity,
+    float air_humidity,
     float air_temperature,
     uint8_t soil_threshold,
     WaterPump_State pump_state) {
@@ -34,7 +36,7 @@ void OledDisplay_Display(
 
     SSD1306_Clear(&oled_handle, SSD1306_BLACK);
 
-    sprintf(oled_buf, "Soil: %13d%%", soil_moisture_ptc);
+    sprintf(oled_buf, "Soil: %13d%%", soil_moisture_pct);
     SSD1306_WriteString(&oled_handle, 0, 0, oled_buf);
 
     sprintf(oled_buf, "Threshold: %7d%%", soil_threshold);

@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include "rht01.h"
 #include "soil_sensor.h"
-#include "stm32f1xx_hal.h"
 
-#define SENSOR_MONITOR_INTERVAL_MS 2000U
+#define SENSOR_MONITOR_INTERVAL_MS 5000U
 
 static RHT01_Handle rht_handle;
 static SoilSensor_Handle soil_handle;

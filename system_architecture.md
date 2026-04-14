@@ -8,21 +8,17 @@
 
 ### 시스템 구성
 
-```
-[토양습도센서] ──ADC──▶
-[RHT-01]      ──GPIO─▶ [STM32 Nucleo F103RB] ──릴레이──▶ [DC12V 워터펌프]
-                               │  │
-                         OLED  │  │ UART 시리얼
-                      (SSD1306)│  │
-                               │  ▼
-                         [라즈베리파이5 8GB]
-                         + FastAPI 웹서버
-                               │
-                         Wi-Fi 내부망
-                               │
-                               ▼
-                     [웹 브라우저 대시보드]
-                     (PC/모바일 내부망 접속)
+```mermaid
+flowchart TD
+    SOIL["토양습도센서<br/>SZH-EK106"] -- "ADC" --> STM32["STM32 Nucleo F103RB<br/>센서 읽기 · 펌프 제어 · OLED 표시"]
+    RHT["온습도센서<br/>RHT-01"] -- "GPIO bit-bang" --> STM32
+    STM32 -- "GPIO 릴레이 제어" --> RELAY["릴레이 모듈"]
+    RELAY -- "전원 스위칭" --> PUMP["DC12V 워터펌프"]
+    STM32 -- "I2C" --> OLED["SSD1306 OLED"]
+    STM32 -- "USB UART 센서 데이터" --> RPI["라즈베리파이5 8GB<br/>FastAPI 웹서버"]
+    RPI -- "USB UART 제어 명령" --> STM32
+    WEB["웹 브라우저 대시보드<br/>PC / 모바일"] -- "Wi-Fi 내부망<br/>HTTP 요청" --> RPI
+    RPI -- "정적 파일 · JSON 응답" --> WEB
 ```
 
 ### 레이어별 역할
@@ -38,37 +34,51 @@
 
 STM32 펌웨어는 CubeMX가 생성한 `Core` 코드 위에 `BSP` 드라이버 계층과 `App` 서비스 계층을 올리는 구조로 정리한다.
 
-```
-Core/main.c
-  ├─ HAL_Init(), SystemClock_Config()
-  ├─ MX_GPIO_Init(), MX_ADC1_Init(), MX_I2C1_Init(), MX_USART2_UART_Init()
-  ├─ DWT cycle counter enable (RHT-01 us delay)
-  ├─ PlantMonitor_Init(...)
-  └─ while (1)
-       └─ PlantMonitor_Run(...)
+```mermaid
+graph TD
+    subgraph CORE["Core (CubeMX 자동생성)"]
+        MAIN["main.c<br/>HAL 초기화 · MX 페리페럴 초기화 · 진입점"]
+    end
 
-App/plant_monitor
-  ├─ 전체 STM32 앱 흐름 제어
-  ├─ SensorMonitor_Init/Run 호출
-  ├─ OLED 표시
-  └─ 이후 watering_controller 조립 예정
+    subgraph APP["App Layer"]
+        PM["plant_monitor<br/>전체 앱 흐름 조립"]
+        SM["sensor_monitor<br/>센서 데이터 수집"]
+        WP["water_pump<br/>자동 급수 상태 머신<br/>IDLE / PUMPING / SOAKING"]
+        OD["oled_display<br/>OLED 화면 레이아웃"]
+    end
 
-App/sensor_monitor
-  ├─ SoilSensor_Handle / RHT01_Handle 보관
-  ├─ 센서 초기화 상태 취합
-  ├─ 토양습도센서 + 온습도센서 읽기
-  └─ 최신 센서값을 SensorMonitor_Data로 제공
+    subgraph BSP["BSP Layer (하드웨어 드라이버 · 재사용 가능)"]
+        RHT["rht01<br/>온습도센서 bit-bang"]
+        SOIL["soil_sensor<br/>ADC 토양습도센서"]
+        REL["relay<br/>GPIO 릴레이 제어"]
+        SSD["ssd1306<br/>I2C OLED 드라이버"]
+        UCMD["uart_cmd<br/>UART 수신 · 라인 버퍼"]
+    end
 
-App/water_pump (예정)
-  ├─ 릴레이를 통해 워터펌프 제어
-  ├─ 임계값 기반 자동 급수 판단
-  └─ IDLE / PUMPING / SOAKING 상태 머신 관리
+    subgraph HW["Hardware"]
+        H1["RHT-01<br/>온습도센서"]
+        H2["SZH-EK106<br/>토양습도센서"]
+        H3["릴레이 + DC12V 펌프"]
+        H4["SSD1306 OLED"]
+        H5["PC / RPi5<br/>(UART 명령 송신)"]
+    end
 
-BSP
-  ├─ soil_sensor: ADC 기반 토양습도센서 드라이버, raw ADC/전압/수분 % 계산
-  ├─ rht01: GPIO bit-bang 온습도센서 드라이버
-  ├─ ssd1306: I2C OLED 드라이버
-  └─ relay: HIGH-active 릴레이 GPIO 드라이버
+    MAIN --> PM
+    PM --> SM
+    PM --> WP
+    PM --> OD
+    PM --> UCMD
+
+    SM --> RHT
+    SM --> SOIL
+    WP --> REL
+    OD --> SSD
+
+    RHT  --> H1
+    SOIL --> H2
+    REL  --> H3
+    SSD  --> H4
+    UCMD --> H5
 ```
 
 현재 설계 원칙:
@@ -79,6 +89,7 @@ BSP
 | `BSP/*`                   | 개별 하드웨어를 직접 다루는 재사용 가능한 드라이버 |
 | `App/sensor_monitor`      | 센서 드라이버들을 묶어 최신 센서 데이터를 제공     |
 | `App/plant_monitor`       | STM32 앱 전체 흐름을 조립                          |
+| `App/oled_display`        | OLED 표시 레이아웃과 주기적 화면 업데이트 담당     |
 | `App/water_pump`          | 자동 급수 정책과 non-blocking 상태 머신 담당 예정  |
 
 자동 급수는 RTOS 없이 `HAL_GetTick()` 기반 non-blocking 상태 머신으로 구현한다. 펌프 ON 시간과 물 흡수 대기 시간 동안에도 센서 모니터링, OLED 표시, UART 처리 흐름이 멈추지 않도록 긴 `HAL_Delay()` 사용은 피한다.
@@ -130,7 +141,7 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
                                 │
 웹 대시보드 ──임계값 설정──▶ FastAPI ──UART──▶ STM32
                                 │
-웹 대시보드 ◀──센서데이터 조회──┘ (DB에서 읽어서 JSON 반환)
+웹 대시보드 ◀──센서데이터 조회──────┘ (DB에서 읽어서 JSON 반환)
 ```
 
 - **UART 수신**: FastAPI 내부 백그라운드 스레드가 시리얼 포트(`/dev/ttyACM0`)를 상시 읽고, 데이터 수신 시 SQLite에 저장
@@ -162,7 +173,7 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 | MCU                 | STM32 Nucleo F103RB-C05                               |
 | 토양습도센서        | SZH-EK106 (아날로그 ADC)                              |
 | 온습도센서          | RHT-01 (디지털 GPIO 비트뱅)                           |
-| 릴레이 모듈         | 3.3V 1채널 / HIGH 신호 ON (JQC-3FF-S-Z 기반, 실측 확인) |
+| 릴레이 모듈         | 5V 1채널 / 3.3V 제어 신호 지원 / HIGH 신호 ON (JQC-3FF-S-Z 기반, 실측 확인) |
 | 워터펌프            | DC12V 수중펌프 (외경8mm 내경6mm)                      |
 | 실리콘 호스         | 외경10mm 내경8mm                                      |
 | OLED 디스플레이     | 0.96인치 I2C SSD1306 / **STM32에 연결**               |
@@ -182,7 +193,7 @@ STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
 | 라즈베리파이5  | 공식 어댑터 5V/5A USB-C                        |
 | STM32 Nucleo   | 라즈베리파이5 USB 포트 연결 (전원 + UART 겸용) |
 | 펌프           | 12V DC 어댑터 별도 공급                        |
-| 릴레이 (제어부) | STM32 3.3V 핀에서 공급                        |
+| 릴레이 모듈     | 5V 1채널 모듈이지만 3.3V 동작/제어 신호 지원, STM32 3.3V GPIO로 HIGH-active 제어 |
 | OLED (SSD1306) | STM32 3.3V 핀에서 공급                         |
 
 ---

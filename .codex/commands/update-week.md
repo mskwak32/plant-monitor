@@ -36,6 +36,8 @@ Update the weekly context file at `주차별_맥락/{N}주차_맥락.md`.
 - Follow the format of the previous weekly context file.
 - Write the weekly context file in Korean.
 - Leave incomplete items blank or mark them as `예정`.
-- Include code blocks, timing diagrams, and other learning-helpful material when useful.
+- Include code blocks, diagrams, and other learning-helpful material when useful. Prefer Mermaid diagrams over ASCII art whenever the content can be expressed as a flowchart, sequence diagram, or graph.
 - Do not over-compress the `이번 주 배운 것들` section.
 - Keep enough detail so the document can be used later for study or as source material for a book-length writeup.
+- Do not include a "next week plan" section.
+- In Mermaid diagrams, `\n` is not rendered. Use `<br>` for line breaks inside node labels.
