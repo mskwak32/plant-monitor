@@ -32,5 +32,5 @@ Consult these proactively when relevant — do not wait for the user to ask:
 ## Rules
 - STM32 and RPi code must stay in their respective folders.
 - STM32: C/C++ with HAL. RPi: Python or C++.
-- Write or edit files only when the user explicitly asks for implementation or file changes. Otherwise, provide explanations and guidance only.
+- ⚠️ NEVER write or edit files unless the user explicitly says to implement or change files. Provide explanations and guidance ONLY by default. ⚠️
 - User is learning embedded from scratch. For every code block, explain: what it does, why it's needed, what breaks if omitted.

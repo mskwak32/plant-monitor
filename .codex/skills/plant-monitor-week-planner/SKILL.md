@@ -9,7 +9,6 @@ description: Plan the next step for the Plant Monitor portfolio project from wee
 
 1. Identify the target week number from the user's latest message.
 2. Read the applicable `AGENTS.md` instructions before interpreting or changing project files.
-3. Read `system_architecture.md` to understand the project architecture, hardware, and current system boundaries.
 4. Read `개발_일정_체크리스트.md` to find planned tasks and the current week-level progress.
 5. Check `주차별_맥락/{N}주차_맥락.md`.
 6. If `주차별_맥락/{N}주차_맥락.md` exists, read it and treat the request as continuing that week.
