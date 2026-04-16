@@ -136,12 +136,14 @@ graph TD
 
 FastAPI 서버 하나가 UART 수신, DB 저장, API 서빙, HTML 서빙을 모두 담당한다.
 
-```
-STM32 (UART) ──센서데이터──▶ FastAPI ──▶ SQLite DB
-                                │
-웹 대시보드 ──임계값 설정──▶ FastAPI ──UART──▶ STM32
-                                │
-웹 대시보드 ◀──센서데이터 조회──────┘ (DB에서 읽어서 JSON 반환)
+```mermaid
+flowchart LR
+    STM32["STM32"] -->|UART 센서데이터| FastAPI["FastAPI"]
+    FastAPI -->|저장| DB[("SQLite DB")]
+    Dashboard["웹 대시보드"] -->|임계값 설정| FastAPI
+    FastAPI -->|UART| STM32
+    Dashboard -->|센서데이터 조회| FastAPI
+    FastAPI -->|DB에서 읽어서 JSON 반환| Dashboard
 ```
 
 - **UART 수신**: FastAPI 내부 백그라운드 스레드가 시리얼 포트(`/dev/ttyACM0`)를 상시 읽고, 데이터 수신 시 SQLite에 저장
