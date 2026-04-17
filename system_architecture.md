@@ -120,7 +120,6 @@ graph TD
 | GET    | /sensor/current     | 현재 센서값                     |
 | GET    | /sensor/logs        | 시간별 로그                     |
 | GET    | /pump/logs          | 펌프 이력                       |
-| POST   | /pump/control       | 펌프 수동 제어                  |
 | POST   | /settings/threshold | 임계값 설정 (STM32에 UART 전달) |
 | GET    | /settings/threshold | 임계값 조회                     |
 
@@ -128,7 +127,7 @@ graph TD
 
 **sensor_logs**: id, timestamp, soil_humidity, air_humidity, temperature
 
-**pump_logs**: id, timestamp, action(ON/OFF), trigger(AUTO/MANUAL)
+**pump_logs**: id, timestamp, action(ON/OFF)
 
 **settings**: id, soil_humidity_min, updated_at
 
@@ -165,6 +164,51 @@ flowchart LR
 | 전압 레벨          | USB 경유이므로 레벨 변환 불필요                   |
 | 전원 겸용          | USB 한 줄로 전원 공급 + UART 통신 동시 처리       |
 | RPi5 USB 공급 전류 | 포트당 600mA / STM32 소비 200~300mA → 여유 있음   |
+
+---
+
+## UART 통신 프로토콜
+
+### 공통 설정
+
+| 항목      | 값                    |
+| --------- | --------------------- |
+| Baud Rate | 115200                |
+| 줄끝      | `\n` (LF)             |
+
+### STM32 → RPi5
+
+디버그 printf와 구분하기 위해 데이터 메시지 앞에 `msg=`를 붙인다. RPi5는 `msg=`로 시작하는 줄만 파싱한다.
+
+**센서 데이터** — 센서 측정 직후 즉시 전송 (`sensor_monitor`에서 printf):
+
+```
+msg={"type":"sensor_data","data":{"soil_moisture_pct":55,"air_temperature":22.5,"air_humidity":60.0}}
+```
+
+**펌프 상태** — 상태 전환 즉시 전송 (`water_pump`에서 printf):
+
+```
+msg={"type":"water_pump","data":{"state":"WATER_PUMP_PUMPING"}}
+```
+
+| 필드 | 타입 | 설명 |
+| ---- | ---- | ---- |
+| `type` | 문자열 | 메시지 종류 (`"sensor_data"` / `"water_pump"`) |
+| `data.soil_moisture_pct` | 정수 | 토양 수분 (%) |
+| `data.air_temperature` | 소수점 1자리 | 온도 (°C) |
+| `data.air_humidity` | 소수점 1자리 | 공기 습도 (%) |
+| `data.state` | 문자열 | `WaterPump_State` 열거형 이름 (`WATER_PUMP_IDLE` / `WATER_PUMP_PUMPING` / `WATER_PUMP_SOAKING`) |
+
+### RPi5 → STM32
+
+```
+msg={"threshold":30}
+```
+
+| 필드 | 타입 | 설명 |
+| ---- | ---- | ---- |
+| `threshold` | 정수 (0~100) | 토양 수분 임계값 (%) |
 
 ---
 

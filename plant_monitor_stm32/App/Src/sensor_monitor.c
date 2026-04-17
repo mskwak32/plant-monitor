@@ -44,10 +44,10 @@ void SensorMonitor_Run(void) {
 
     last_run_tick = now; 
     if (SoilSensor_Read(&soil_handle) == HAL_OK) {
-        printf(
-            "Soil ADC: %lu Voltage: %.2fV\r\n", soil_handle.data.adc_value,
-            soil_handle.data.voltage);
         data.soil_moisture_pct = soil_handle.data.moisture_pct;
+        printf(
+            "Soil ADC: %lu Voltage: %.2fV, moisture_pct: %.2f%%\r\n", soil_handle.data.adc_value,
+            soil_handle.data.voltage, data.soil_moisture_pct);
     }
     else {
         printf("Soil sensor read failed\r\n");

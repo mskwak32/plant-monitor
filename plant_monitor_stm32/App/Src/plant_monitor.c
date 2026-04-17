@@ -55,14 +55,18 @@ static void PlantMonitor_HandleUartCmd(void) {
         UartCmd_GetLine(&uart_handle, buf);
         printf("Received UART command: %s\r\n", buf);
 
-        // 프로토콜: "T:35" -> 토양 수분 임계값 35%로 설정
-        if(buf[0] == 'T' && buf[1] == ':') {
-            uint8_t val = (uint8_t)atoi(&buf[2]);
-            if(val <= 100) {
-                soil_threshold = val;
-                printf("Threshold updated: %d%%\r\n", soil_threshold);
-            } else {
-                printf("Invalid threshold value: %d\r\n", val);
+        // 프로토콜: msg={"threshold":30}
+        if(strncmp(buf, "msg=", 4) == 0) {
+            const char* json = buf + 4;     // "msg=" 이후부터 JSON 문자열
+            if(strstr(json, "threshold")) {
+                int val;
+                if(sscanf(json, "{\"threshold\":%d}", &val) == 1) {
+                    if(val >= 0 && val <= 100) {
+                        soil_threshold = (uint8_t)val;
+                    } else {
+                        printf("Invalid threshold: %d\r\n", val);
+                    }
+                }
             }
         }
     }

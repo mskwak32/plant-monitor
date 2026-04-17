@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "stm32f1xx_hal.h"
 
-#define UART_CMD_BUF_SIZE 16
+#define UART_CMD_BUF_SIZE 32
 
 typedef struct {
     UART_HandleTypeDef *huart;
