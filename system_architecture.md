@@ -195,10 +195,10 @@ msg={"type":"water_pump","data":{"state":"WATER_PUMP_PUMPING"}}
 | 필드 | 타입 | 설명 |
 | ---- | ---- | ---- |
 | `type` | 문자열 | 메시지 종류 (`"sensor_data"` / `"water_pump"`) |
-| `data.soil_moisture_pct` | 정수 | 토양 수분 (%) |
-| `data.air_temperature` | 소수점 1자리 | 온도 (°C) |
-| `data.air_humidity` | 소수점 1자리 | 공기 습도 (%) |
-| `data.state` | 문자열 | `WaterPump_State` 열거형 이름 (`WATER_PUMP_IDLE` / `WATER_PUMP_PUMPING` / `WATER_PUMP_SOAKING`) |
+| `data.soil_moisture_pct` | 정수 또는 `null` | 토양 수분 (%) — 센서 읽기 실패 시 `null` |
+| `data.air_temperature` | 소수점 1자리 또는 `null` | 온도 (°C) — 센서 읽기 실패 시 `null` |
+| `data.air_humidity` | 소수점 1자리 또는 `null` | 공기 습도 (%) — 센서 읽기 실패 시 `null` |
+| `data.state` | 문자열 | `WaterPump_State` 열거형 이름 (`WATER_PUMP_IDLE` / `WATER_PUMP_PUMPING` / `WATER_PUMP_SOAKING` / `UNKNOWN`) |
 
 ### RPi5 → STM32
 
