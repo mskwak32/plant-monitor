@@ -115,13 +115,14 @@ graph TD
 
 ### REST API
 
-| Method | Endpoint            | 설명                            |
-| ------ | ------------------- | ------------------------------- |
-| GET    | /sensor/current     | 현재 센서값                     |
-| GET    | /sensor/logs        | 시간별 로그                     |
-| GET    | /pump/logs          | 펌프 이력                       |
-| POST   | /settings/threshold | 임계값 설정 (STM32에 UART 전달) |
-| GET    | /settings/threshold | 임계값 조회                     |
+| Method | Endpoint            | 설명                                        |
+| ------ | ------------------- | ------------------------------------------- |
+| GET    | /sensor/current     | 현재 센서값                                 |
+| GET    | /sensor/logs        | 시간별 로그                                 |
+| GET    | /stream             | 실시간 데이터 스트리밍 — SSE (연결 유지)    |
+| GET    | /pump/logs          | 펌프 이력                                   |
+| POST   | /settings/threshold | 임계값 설정 (STM32에 UART 전달)             |
+| GET    | /settings/threshold | 임계값 조회                                 |
 
 ### DB 설계
 
@@ -133,25 +134,56 @@ graph TD
 
 ### FastAPI 역할 및 데이터 흐름
 
-FastAPI 서버 하나가 UART 수신, DB 저장, API 서빙, HTML 서빙을 모두 담당한다.
+FastAPI 서버 하나가 UART 수신, DB 저장, API 서빙, HTML 서빙, SSE 스트리밍을 모두 담당한다.
 
 ```mermaid
 flowchart LR
     STM32["STM32"] -->|UART 센서데이터| FastAPI["FastAPI"]
     FastAPI -->|저장| DB[("SQLite DB")]
-    Dashboard["웹 대시보드"] -->|임계값 설정| FastAPI
+    FastAPI -->|SSE 스트리밍| Dashboard["웹 대시보드"]
+    Dashboard -->|임계값 설정 POST| FastAPI
     FastAPI -->|UART| STM32
-    Dashboard -->|센서데이터 조회| FastAPI
+    Dashboard -->|로그 조회 GET| FastAPI
     FastAPI -->|DB에서 읽어서 JSON 반환| Dashboard
 ```
 
-- **UART 수신**: FastAPI 내부 백그라운드 스레드가 시리얼 포트(`/dev/ttyACM0`)를 상시 읽고, 데이터 수신 시 SQLite에 저장
+- **UART 수신**: `service/uart_listener` 백그라운드 스레드가 `/dev/ttyACM0`를 상시 읽고, 수신 시 SQLite 저장과 동시에 `asyncio.Queue`에 발행
+- **실시간 스트리밍**: `GET /stream` SSE 엔드포인트가 Queue를 구독 → 새 데이터 즉시 브라우저로 전송 → 브라우저 `EventSource`가 수신 즉시 화면 갱신
 - **임계값 송신**: 웹 대시보드에서 `POST /settings/threshold` 호출 → FastAPI가 UART로 STM32에 전달
-- **데이터 조회**: 대시보드 JS가 `GET /sensor/logs` 등 API를 주기적으로 fetch() → FastAPI가 DB에서 읽어 JSON 반환 → Chart.js로 그래프 렌더링
+- **로그 조회**: 대시보드 JS가 `GET /sensor/logs` 등 API를 fetch() → FastAPI가 DB에서 읽어 JSON 반환 → Chart.js로 그래프 렌더링
 - **HTML 서빙**: FastAPI가 정적 파일(HTML/CSS/JS)도 직접 서빙 → Flask 불필요
 
 > FastAPI와 Flask는 둘 다 HTML 서빙 + REST API가 가능한 Python 웹 프레임워크다.
 > FastAPI 선택 이유: 자동 Swagger 문서(`/docs`), 타입 힌트 기반 자동 검증, 포트폴리오 완성도.
+
+### RPi5 소프트웨어 내부 구조
+
+```
+plant_monitor_rpi/
+├── main.py                  # FastAPI 앱, lifespan (스레드 시작/정지)
+├── uart/
+│   ├── serial_port.py       # 시리얼 포트 열기/읽기/쓰기 (raw bytes)
+│   └── protocol.py          # msg= 파싱 → 타입 객체 반환
+├── db/
+│   ├── database.py          # SQLite 연결, 테이블 생성
+│   └── repository.py        # sensor_logs / pump_logs / settings CRUD
+├── service/
+│   └── uart_listener.py     # 백그라운드 스레드: UART 읽기 → 파싱 → DB 저장 + Queue 발행
+├── api/
+│   ├── sensor.py            # GET /sensor/current, /sensor/logs
+│   ├── pump.py              # GET /pump/logs
+│   ├── settings.py          # GET/POST /settings/threshold
+│   └── stream.py            # GET /stream (SSE 엔드포인트)
+└── static/                  # HTML/CSS/JS (10~11주차)
+```
+
+| 계층 | 파일 | 역할 |
+| ---- | ---- | ---- |
+| Transport | `uart/serial_port.py` | 시리얼 포트 하드웨어만 담당, 파싱 없음 |
+| Protocol | `uart/protocol.py` | `msg=` 줄 → Python 타입 객체 변환 |
+| Persistence | `db/repository.py` | DB CRUD, SQL 쿼리를 여기서만 씀 |
+| Service | `service/uart_listener.py` | Transport + Protocol + Persistence 조립, Queue 발행 |
+| API | `api/*.py` | HTTP 요청 처리, Repository/Queue 사용 |
 
 ---
 
@@ -244,21 +276,6 @@ msg={"threshold":30}
 
 ---
 
-## 개발 일정
-
-| 기간    | 레이어       | 목표                                                                                    |
-| ------- | ------------ | --------------------------------------------------------------------------------------- |
-| 1~2주   | STM32        | CubeIDE 세팅, LED Blink, UART로 PC에 "Hello" 출력                                       |
-| 3~4주   | STM32        | 토양센서 ADC 읽기, RHT-01 읽기, UART 송신                                               |
-| 5~6주   | STM32        | OLED I2C 표시, 릴레이로 펌프 ON/OFF, 임계값 기반 자동 제어                             |
-| 7주     | STM32        | UART 명령 수신(임계값 설정)                                                             |
-| 8~9주   | 라즈베리파이 | OS 세팅, UART 수신, SQLite DB 저장, FastAPI REST API 구현                               |
-| 10~11주 | 웹 대시보드  | HTML/JS 대시보드, Chart.js 그래프, 임계값 설정 폼, 펌프 이력                            |
-| 12~13주 | 전체         | 통합 테스트, 버그 수정                                                                  |
-| 14주    | 마무리       | README, GitHub, 시연 영상                                                               |
-
----
-
 ## 완성 이후 고도화 작업
 
 ### 부팅 시 부품 상태 체크
@@ -286,4 +303,6 @@ I2C 노이즈, 센서 미연결 등 하드웨어 이상 시 MCU 전체가 해당
 - ADC 변환 ≈ 수십 μs → 10ms 설정
 - UART 115200bps, 1바이트 ≈ 87μs → 10ms 설정
 
----
+### React로 웹 대시보드 재구성
+
+HTML+JS+Chart.js로 구현된 대시보드를 React로 재구성한다. 컴포넌트 기반 구조로 상태 관리가 명확해지고, SSE 수신 데이터를 `useState`로 관리하면 영향받는 컴포넌트만 자동 재렌더링된다. Kotlin Compose의 `mutableStateOf`와 같은 개념이다.
