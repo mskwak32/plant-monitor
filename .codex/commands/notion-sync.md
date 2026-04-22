@@ -3,7 +3,9 @@ Sync user-specified markdown files from the plant-monitor project to Notion.
 ## Targets
 
 - `system_architecture.md` -> page `3386e29b-97d5-814b-96f0-e5e4515e58c7`.
-- `주차별_맥락/{N}주차_맥락.md` -> child page under parent `3386e29b-97d5-80dd-8546-f9877e9f82f3`.
+- `주차별_맥락/{N}주차_맥락.md`:
+  - Weeks 1-7 -> child page under STM32 parent `3386e29b-97d5-80dd-8546-f9877e9f82f3`.
+  - Weeks 8+ -> child page under RPi parent `3386e29b-97d5-8085-96c7-df544d93f3cf`.
 
 ## State
 
@@ -42,7 +44,7 @@ Sync user-specified markdown files from the plant-monitor project to Notion.
 11. Update page `3386e29b-97d5-814b-96f0-e5e4515e58c7` when `system_architecture.md` is a candidate.
 12. For each weekly candidate, preprocess the file and build the page title as `N주차 — ...`.
 13. Update the existing weekly page when `notion_page_id` exists.
-14. Create a new weekly child page under `3386e29b-97d5-80dd-8546-f9877e9f82f3` when `notion_page_id` does not exist.
+14. Create a new weekly child page under the correct weekly parent when `notion_page_id` does not exist: weeks 1-7 use STM32 parent, weeks 8+ use RPi parent.
 15. Save `notion_page_id` for each successfully synced weekly file.
 16. Write the state file after all approved work finishes.
 

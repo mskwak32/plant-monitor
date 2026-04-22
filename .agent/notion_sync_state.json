@@ -34,11 +34,16 @@
       "last_mtime": 1776166813,
       "content_hash": "f6d7596e88c52e1c4e00e1f62f43433c2c935808260eb8958ce7766b3fc4c496",
       "notion_page_id": "3426e29b-97d5-81c5-a959-d3d23fffee70"
+    },
+    "주차별_맥락/8주차_맥락.md": {
+      "last_mtime": 1776818349,
+      "content_hash": "d421caa61325145a85729b21d69f4f0c6411434a4cd0f559bfee646e5ce34f2c",
+      "notion_page_id": "34a6e29b-97d5-810c-992c-d0c1dbc197d9"
     }
   },
   "architecture": {
-    "last_mtime": 1776164560,
-    "content_hash": "4bea819916b03193b70cc4e38f1e47909268169d62f70b4907e0fa84450bc372",
+    "last_mtime": 1776817435,
+    "content_hash": "91dac49eb3423828f1c6d0e8b78fc1b7826d42f11b2419e4386dd77838460705",
     "notion_page_id": "3386e29b-97d5-814b-96f0-e5e4515e58c7"
   }
 }
