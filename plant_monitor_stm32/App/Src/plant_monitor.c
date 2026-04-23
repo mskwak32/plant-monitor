@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "sensor_monitor.h"
 #include "stm32f1xx_hal.h"
 #include "water_pump.h"
