@@ -1,10 +1,10 @@
 import serial
 
-_PORT = "/dev/ttyACM0"
+DEFAULT_PORT = "/dev/ttyACM0"
 _BAUD = 115200
 
 class SerialPort:
-    def __init__(self, port: str = _PORT, baud: int = _BAUD):
+    def __init__(self, port: str = DEFAULT_PORT, baud: int = _BAUD):
         self._ser = serial.Serial(port, baud, timeout=1)
         
     def readline(self) -> str:
