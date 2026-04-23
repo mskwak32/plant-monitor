@@ -306,3 +306,13 @@ I2C 노이즈, 센서 미연결 등 하드웨어 이상 시 MCU 전체가 해당
 ### React로 웹 대시보드 재구성
 
 HTML+JS+Chart.js로 구현된 대시보드를 React로 재구성한다. 컴포넌트 기반 구조로 상태 관리가 명확해지고, SSE 수신 데이터를 `useState`로 관리하면 영향받는 컴포넌트만 자동 재렌더링된다. Kotlin Compose의 `mutableStateOf`와 같은 개념이다.
+
+### Docker로 서비스 배포
+
+파이썬 가상환경 대신 Docker 컨테이너로 FastAPI 서버를 실행한다. 컨테이너가 격리된 실행 환경을 제공하므로 시스템 Python과 충돌 없이 의존성을 관리할 수 있고, 재배포가 단순해진다.
+
+UART 디바이스(`/dev/ttyACM0`)는 컨테이너 실행 시 `--device` 옵션으로 전달한다:
+
+```bash
+docker run --device /dev/ttyACM0 -p 8000:8000 plant-monitor
+```
