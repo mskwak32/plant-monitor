@@ -2,6 +2,7 @@ import json
 import logging
 from dataclasses import dataclass
 from typing import Optional, Union
+from models.settings import Settings
 
 TYPE_SENSOR_DATA = "sensor_data"
 TYPE_WATERPUMP = "water_pump"
@@ -41,3 +42,6 @@ def parse_line(line: str) -> Optional[Union[SensorData, PumpState]]:
     except (json.JSONDecodeError, KeyError):
         logger.warning("UART 파싱 실패: %s", line)
     return None
+
+def create_setting_message(settings: Settings) -> str:
+    return "msg=" + json.dumps({"threshold": settings.soil_moisture_min}) + "\n"

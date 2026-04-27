@@ -1,3 +1,4 @@
+# SSE 엔드포인트
 import asyncio
 import json
 from dataclasses import asdict

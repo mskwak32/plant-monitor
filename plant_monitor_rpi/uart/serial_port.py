@@ -3,9 +3,13 @@ import serial
 DEFAULT_PORT = "/dev/ttyACM0"
 _BAUD = 115200
 
-class SerialPort:
+class SerialPort:    
     def __init__(self, port: str = DEFAULT_PORT, baud: int = _BAUD):
         self._ser = serial.Serial(port, baud, timeout=1)
+        
+    @property
+    def port_name(self) -> str:
+        return self._ser.port
         
     def readline(self) -> str:
         return self._ser.readline().decode("utf-8", errors="ignore").strip()

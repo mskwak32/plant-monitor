@@ -2,6 +2,7 @@ import sqlite3
 from typing import Optional
 from db.database import get_connection
 from uart.protocol import SensorData, PumpState
+from models.settings import Settings
 
 def insert_sensor(data: SensorData) -> None:
     with get_connection() as connection:
@@ -28,10 +29,20 @@ def insert_pump(pump: PumpState) -> None:
         connection.execute(
             "INSERT INTO pump_logs (action) VALUES (?)", (pump.state,)
         )
-
-def get_settings() -> Optional[sqlite3.Row]:
+        
+def get_pump_logs(limit: int = 100) -> list[sqlite3.Row]:
     with get_connection() as connection:
-        return connection.execute("SELECT * FROM settings WHERE id = 1").fetchone()
+        return connection.execute(
+            "SELECT * FROM pump_logs ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
+
+def get_settings() -> Settings:
+    with get_connection() as connection:
+        row = connection.execute("SELECT * FROM settings WHERE id = 1").fetchone()
+        return Settings(
+            soil_moisture_min=row["soil_moisture_min"],
+            updated_at=row["updated_at"]
+        )
     
 def update_soil_min(value: int) -> None:
     with get_connection() as connection:
