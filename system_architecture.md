@@ -117,20 +117,20 @@ graph TD
 
 | Method | Endpoint            | 설명                                        |
 | ------ | ------------------- | ------------------------------------------- |
-| GET    | /sensor/current     | 현재 센서값                                 |
-| GET    | /sensor/logs        | 시간별 로그                                 |
+| GET    | /sensors/latest     | 최신 센서값                                 |
+| GET    | /sensors/history    | 센서 이력 (최대 100건)                      |
 | GET    | /stream             | 실시간 데이터 스트리밍 — SSE (연결 유지)    |
 | GET    | /pump/logs          | 펌프 이력                                   |
-| POST   | /settings/threshold | 임계값 설정 (STM32에 UART 전달)             |
-| GET    | /settings/threshold | 임계값 조회                                 |
+| POST   | /settings/threshold | 임계값 설정 (DB 저장 + UART로 STM32 전달)   |
+| GET    | /settings           | 현재 설정값 조회                            |
 
 ### DB 설계
 
-**sensor_logs**: id, timestamp, soil_humidity, air_humidity, temperature
+**sensor_logs**: id, timestamp, soil_moisture_pct, air_humidity, air_temperature
 
 **pump_logs**: id, timestamp, action(ON/OFF)
 
-**settings**: id, soil_humidity_min, updated_at
+**settings**: id, soil_moisture_min, updated_at
 
 ### FastAPI 역할 및 데이터 흐름
 
@@ -161,18 +161,22 @@ flowchart LR
 ```
 plant_monitor_rpi/
 ├── main.py                  # FastAPI 앱, lifespan (스레드 시작/정지)
+├── models/
+│   └── settings.py          # Settings dataclass (DB·UART 양쪽에서 공유)
 ├── uart/
-│   ├── serial_port.py       # 시리얼 포트 열기/읽기/쓰기 (raw bytes)
-│   └── protocol.py          # msg= 파싱 → 타입 객체 반환
+│   ├── serial_port.py       # 시리얼 포트 열기/읽기/쓰기, port_name 프로퍼티
+│   └── protocol.py          # msg= 파싱 → 타입 객체 반환, create_setting_message
 ├── db/
 │   ├── database.py          # SQLite 연결, 테이블 생성
 │   └── repository.py        # sensor_logs / pump_logs / settings CRUD
 ├── service/
-│   └── uart_listener.py     # 백그라운드 스레드: UART 읽기 → 파싱 → DB 저장 + Queue 발행
+│   ├── uart_listener.py     # 백그라운드 스레드: UART 읽기 → 파싱 → DB 저장 + Queue 발행
+│   └── uart_setup.py        # 서버 시작 시 STM32 초기 임계값 동기화
 ├── api/
-│   ├── sensor.py            # GET /sensor/current, /sensor/logs
+│   ├── constants.py         # SSE 페이로드 타입 키 상수
+│   ├── sensor.py            # GET /sensors/latest, /sensors/history
 │   ├── pump.py              # GET /pump/logs
-│   ├── settings.py          # GET/POST /settings/threshold
+│   ├── settings.py          # GET /settings, POST /settings/threshold
 │   └── stream.py            # GET /stream (SSE 엔드포인트)
 └── static/                  # HTML/CSS/JS (10~11주차)
 ```
@@ -183,6 +187,7 @@ plant_monitor_rpi/
 | Protocol | `uart/protocol.py` | `msg=` 줄 → Python 타입 객체 변환 |
 | Persistence | `db/repository.py` | DB CRUD, SQL 쿼리를 여기서만 씀 |
 | Service | `service/uart_listener.py` | Transport + Protocol + Persistence 조립, Queue 발행 |
+| Service | `service/uart_setup.py` | 서버 시작 시 threading.Event로 STM32 연결 대기 후 초기값 전송 |
 | API | `api/*.py` | HTTP 요청 처리, Repository/Queue 사용 |
 
 ---
