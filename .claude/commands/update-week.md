@@ -38,6 +38,7 @@ Update the weekly context file at `주차별_맥락/{N}주차_맥락.md`.
 - Leave incomplete items blank or mark them as `예정`.
 - Include code blocks, diagrams, and other learning-helpful material when useful. Prefer Mermaid diagrams over ASCII art whenever the content can be expressed as a flowchart, sequence diagram, or graph.
 - The `이번 주 배운 것들` section must be written in full detail. Do NOT summarize or compress concepts — write them out completely as if explaining to someone reading for the first time.
+- **NEVER delete existing content in `이번 주 배운 것들`.** Only append new sections or update existing ones in-place. If new content overlaps with an existing section, update that section — do not replace the whole section list. Existing sections that are not touched must remain exactly as they were.
 - Remove duplicates and trivial content, but never cut depth. Each concept should include: what it is, why it works that way, what breaks if you omit it, and analogies to Kotlin/Android where applicable.
 - Keep enough detail so the document can be used later for study or as source material for a book-length writeup.
 - Prefer to err on the side of too much detail rather than too little in the `이번 주 배운 것들` section.

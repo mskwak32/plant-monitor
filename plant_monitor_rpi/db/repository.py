@@ -1,7 +1,8 @@
 import sqlite3
 from typing import Optional
 from db.database import get_connection
-from uart.protocol import SensorData, PumpState
+from models.sensor_data import SensorData
+from models.pump_state import PumpState
 from models.settings import Settings
 
 def insert_sensor(data: SensorData) -> None:

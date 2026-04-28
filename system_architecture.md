@@ -124,13 +124,33 @@ graph TD
 | POST   | /settings/threshold | 임계값 설정 (DB 저장 + UART로 STM32 전달)   |
 | GET    | /settings           | 현재 설정값 조회                            |
 
+### RPi ↔ 웹 SSE 프로토콜
+
+SSE 엔드포인트(`GET /stream`)가 브라우저로 전송하는 메시지 형식.
+
+**센서 데이터** (STM32에서 수신할 때마다 전송)
+
+```json
+{"type": "sensor_data", "soil_moisture_pct": 42, "air_temperature": 25.3, "air_humidity": 60.2}
+```
+
+**펌프 상태** (상태 전환 시마다 전송)
+
+```json
+{"type": "water_pump", "state": "PUMPING"}
+```
+
+`state` 값: `IDLE` (대기 중) / `PUMPING` (급수 중) / `SOAKING` (흡수 대기) / `UNKNOWN`
+
+> STM32가 보내는 raw 상태값(`WATER_PUMP_IDLE` 등)은 `uart/protocol.py`에서 위 값으로 정규화된다.
+
 ### DB 설계
 
 **sensor_logs**: id, timestamp, soil_moisture_pct, air_humidity, air_temperature
 
-**pump_logs**: id, timestamp, action(ON/OFF)
+**pump_logs**: id, timestamp, action (IDLE / PUMPING / SOAKING)
 
-**settings**: id, soil_moisture_min, updated_at
+**settings**: id, threshold, updated_at
 
 ### FastAPI 역할 및 데이터 흐름
 
@@ -150,7 +170,7 @@ flowchart LR
 - **UART 수신**: `service/uart_listener` 백그라운드 스레드가 `/dev/ttyACM0`를 상시 읽고, 수신 시 SQLite 저장과 동시에 `asyncio.Queue`에 발행
 - **실시간 스트리밍**: `GET /stream` SSE 엔드포인트가 Queue를 구독 → 새 데이터 즉시 브라우저로 전송 → 브라우저 `EventSource`가 수신 즉시 화면 갱신
 - **임계값 송신**: 웹 대시보드에서 `POST /settings/threshold` 호출 → FastAPI가 UART로 STM32에 전달
-- **로그 조회**: 대시보드 JS가 `GET /sensor/logs` 등 API를 fetch() → FastAPI가 DB에서 읽어 JSON 반환 → Chart.js로 그래프 렌더링
+- **로그 조회**: 대시보드 JS가 `GET /pump/logs` 등 API를 fetch() → FastAPI가 DB에서 읽어 JSON 반환
 - **HTML 서빙**: FastAPI가 정적 파일(HTML/CSS/JS)도 직접 서빙 → Flask 불필요
 
 > FastAPI와 Flask는 둘 다 HTML 서빙 + REST API가 가능한 Python 웹 프레임워크다.
@@ -162,10 +182,12 @@ flowchart LR
 plant_monitor_rpi/
 ├── main.py                  # FastAPI 앱, lifespan (스레드 시작/정지)
 ├── models/
-│   └── settings.py          # Settings dataclass (DB·UART 양쪽에서 공유)
+│   ├── settings.py          # Settings dataclass
+│   ├── sensor_data.py       # SensorData dataclass
+│   └── pump_state.py        # PumpState dataclass, 정규화 상태 상수 (IDLE/PUMPING/SOAKING)
 ├── uart/
 │   ├── serial_port.py       # 시리얼 포트 열기/읽기/쓰기, port_name 프로퍼티
-│   └── protocol.py          # msg= 파싱 → 타입 객체 반환, create_setting_message
+│   └── protocol.py          # STM32 msg= 파싱 → 내부 모델 변환, create_setting_message
 ├── db/
 │   ├── database.py          # SQLite 연결, 테이블 생성
 │   └── repository.py        # sensor_logs / pump_logs / settings CRUD
@@ -173,22 +195,27 @@ plant_monitor_rpi/
 │   ├── uart_listener.py     # 백그라운드 스레드: UART 읽기 → 파싱 → DB 저장 + Queue 발행
 │   └── uart_setup.py        # 서버 시작 시 STM32 초기 임계값 동기화
 ├── api/
-│   ├── constants.py         # SSE 페이로드 타입 키 상수
+│   ├── constants.py         # RPi ↔ 웹 SSE 프로토콜 상수 (타입 키)
 │   ├── sensor.py            # GET /sensors/latest, /sensors/history
 │   ├── pump.py              # GET /pump/logs
 │   ├── settings.py          # GET /settings, POST /settings/threshold
-│   └── stream.py            # GET /stream (SSE 엔드포인트)
-└── static/                  # HTML/CSS/JS (10~11주차)
+│   └── stream.py            # GET /stream (SSE 엔드포인트, 내부 모델 → SSE 직렬화)
+└── static/
+    ├── index.html           # 대시보드 HTML
+    ├── style.css            # 스타일
+    ├── constants.js         # 웹 클라이언트 상수 (api/constants.py 대응)
+    └── app.js               # SSE 수신, REST fetch, DOM 업데이트
 ```
 
 | 계층 | 파일 | 역할 |
 | ---- | ---- | ---- |
+| Model | `models/` | 내부 데이터 클래스 및 정규화 상수 |
 | Transport | `uart/serial_port.py` | 시리얼 포트 하드웨어만 담당, 파싱 없음 |
-| Protocol | `uart/protocol.py` | `msg=` 줄 → Python 타입 객체 변환 |
+| Protocol | `uart/protocol.py` | STM32 raw 메시지 → 내부 모델 변환 |
 | Persistence | `db/repository.py` | DB CRUD, SQL 쿼리를 여기서만 씀 |
 | Service | `service/uart_listener.py` | Transport + Protocol + Persistence 조립, Queue 발행 |
 | Service | `service/uart_setup.py` | 서버 시작 시 threading.Event로 STM32 연결 대기 후 초기값 전송 |
-| API | `api/*.py` | HTTP 요청 처리, Repository/Queue 사용 |
+| API | `api/*.py` | HTTP 요청 처리, 내부 모델 → 웹 프로토콜 직렬화 |
 
 ---
 

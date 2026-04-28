@@ -50,12 +50,14 @@
               <!-- 펌프 로그 카드 -->
                <section class="card" id="pump-log-card">
                 <h2>펌프 로그</h2>
+                <p class="pump-state">현재 상태: <span id="pump-state">--</span></p>
                 <ul id="pump-log-list">
                     <!-- app.js가 GET /pump/logs 응답을 여기에 <li>로 추가 -->
                 </ul>
                </section>
         </main>
 
+        <script src="/static/constants.js"></script>
         <script src="/static/app.js"></script>
     </body>
 </html>

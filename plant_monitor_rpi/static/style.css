@@ -128,6 +128,26 @@ main {
     background-color: #1b5e20;
 }
 
+/* 펌프 상태 */
+.pump-state {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: #555;
+}
+
+#pump-state.idle {
+    color: #888;
+}
+
+#pump-state.pumping {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+#pump-state.soaking {
+    color: #888;
+}
+
 /* 펌프 로그 */
 #pump-log-list {
     list-style: none;

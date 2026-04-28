@@ -6,7 +6,9 @@ import time
 import serial
 
 from db import repository
-from uart.protocol import parse_line, SensorData, PumpState
+from uart.protocol import parse_line
+from models.sensor_data import SensorData
+from models.pump_state import PumpState
 from uart.serial_port import SerialPort, DEFAULT_PORT
 from typing import Optional
 

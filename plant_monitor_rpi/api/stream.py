@@ -4,8 +4,9 @@ import json
 from dataclasses import asdict
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
-from uart.protocol import SensorData, PumpState
-from api.constants import TYPE_KEY, SENSOR_DATA_KEY, PUMP_STATE_KEY
+from models.sensor_data import SensorData
+from models.pump_state import PumpState
+from api.constants import TYPE_KEY, SENSOR_DATA_TYPE, PUMP_STATE_TYPE
 
 router = APIRouter()
 
@@ -13,7 +14,7 @@ async def _event_generator(request: Request, queue: asyncio.Queue):
     while True:
         if await request.is_disconnected():
             break
-        
+
         try:
             # 데이터가 없을 때 무한 블로킹하면 이벤트 루프 전체가 멈추므로 1초 타임아웃
             parsed = await asyncio.wait_for(queue.get(), timeout=1.0)
@@ -21,11 +22,11 @@ async def _event_generator(request: Request, queue: asyncio.Queue):
             # 데이터 없음 → keepalive 코멘트 전송 (TCP idle 타임아웃 방지)
             yield ": keepalive\n\n"
             continue
-        
+
         if isinstance(parsed, SensorData):
-            payload = {TYPE_KEY: SENSOR_DATA_KEY, **asdict(parsed)}
+            payload = {TYPE_KEY: SENSOR_DATA_TYPE, **asdict(parsed)}
         elif isinstance(parsed, PumpState):
-            payload = {TYPE_KEY: PUMP_STATE_KEY, **asdict(parsed)}
+            payload = {TYPE_KEY: PUMP_STATE_TYPE, **asdict(parsed)}
         else:
             continue
         
