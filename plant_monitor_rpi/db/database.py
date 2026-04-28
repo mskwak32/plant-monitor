@@ -27,9 +27,9 @@ def init_db():
                                  
                                  CREATE TABLE IF NOT EXISTS settings(
                                      id INTEGER PRIMARY KEY CHECK (id = 1),
-                                     soil_moisture_min INTEGER NOT NULL DEFAULT 30,
+                                     threshold INTEGER NOT NULL DEFAULT 30,
                                      updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%S', 'now'))
                                  );
                                  
-                                 INSERT OR IGNORE INTO settings (id, soil_moisture_min) VALUES (1, 30);
+                                 INSERT OR IGNORE INTO settings (id, threshold) VALUES (1, 30);
                                  """)

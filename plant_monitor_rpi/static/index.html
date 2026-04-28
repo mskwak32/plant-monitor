@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Plant Monitor</title>
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <header>
+            <h1>🌱 Plant Monitor</h1>
+            <span id="connection-status">연결 중...</span>
+        </header>
+
+        <main>
+            <!-- 센서 현황 카드 -->
+             <section class="card" id="sensor-card">
+                <h2>센서 현황</h2>
+                <div class="sensor-grid">
+                    <div class="sensor-item">
+                        <span class="label">토양 습도</span>
+                        <span class="value" id="soil-moisture">--</span>
+                        <span class="unit">%</span>
+                    </div>
+                    <div class="sensor-item">
+                        <span class="label">온도</span>
+                        <span class="value" id="temperature">--</span>
+                        <span class="unit">°C</span>
+                    </div>
+                    <div class="sensor-item">
+                        <span class="label">습도</span>
+                        <span class="value" id="humidity">--</span>
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <p class="last-updated">마지막 갱신: <span id="last-updated">--</span></p>
+             </section>
+
+             <!-- 자동화 설정 카드 -->
+              <section class="card" id="setting-card">
+                <h2>자동화 설정</h2>
+                <div class="setting-row">
+                    <label for="threshold">토양 습도 임계값</label>
+                    <input type="number" id="threshold" min="0" max="100" step="1">
+                    <span class="unit">%</span>
+                </div>
+                <button id="btn-save-settings" class="btn btn-save">저장</button>
+              </section>
+
+              <!-- 펌프 로그 카드 -->
+               <section class="card" id="pump-log-card">
+                <h2>펌프 로그</h2>
+                <ul id="pump-log-list">
+                    <!-- app.js가 GET /pump/logs 응답을 여기에 <li>로 추가 -->
+                </ul>
+               </section>
+        </main>
+
+        <script src="/static/app.js"></script>
+    </body>
+</html>

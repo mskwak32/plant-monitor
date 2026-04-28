@@ -10,11 +10,11 @@ from service import uart_listener
 router = APIRouter()
 
 class SettingsResponse(BaseModel):
-    soil_moisture_min: int
+    threshold: int
     updated_at: str
-    
+
 class ThresholdRequest(BaseModel):
-    soil_moisture_min: int = Field(ge=0, le=100)
+    threshold: int = Field(ge=0, le=100)
     
 @router.get("/settings", response_model=SettingsResponse)
 async def get_settings():
@@ -26,7 +26,7 @@ async def update_threshold(body: ThresholdRequest):
     if port is None:
         raise HTTPException(status_code=503, detail="STM32 미연결")
 
-    repository.update_soil_min(body.soil_moisture_min)
+    repository.update_threshold(body.threshold)
 
     msg = protocol.create_setting_message(repository.get_settings())
     port.write(msg)

@@ -3,6 +3,8 @@ import asyncio
 import logging
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from service import uart_listener, uart_setup
 from db.database import init_db
 from api import stream, sensor, pump, settings
@@ -27,3 +29,10 @@ app.include_router(stream.router)
 app.include_router(sensor.router)
 app.include_router(pump.router)
 app.include_router(settings.router)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    with open("static/index.html", encoding="utf-8") as f:
+        return f.read()

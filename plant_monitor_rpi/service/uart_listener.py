@@ -12,7 +12,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-_RETRY_INTERVAL = 3     # STM32 없을 때 재시도 간격(초)
+_RETRY_INTERVAL = 10     # STM32 없을 때 재시도 간격(초)
 
 _current_port: Optional[SerialPort] = None
 _connected_event = threading.Event()        # 연결 상태 이벤트

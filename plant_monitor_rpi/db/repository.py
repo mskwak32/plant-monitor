@@ -40,14 +40,14 @@ def get_settings() -> Settings:
     with get_connection() as connection:
         row = connection.execute("SELECT * FROM settings WHERE id = 1").fetchone()
         return Settings(
-            soil_moisture_min=row["soil_moisture_min"],
+            threshold=row["threshold"],
             updated_at=row["updated_at"]
         )
     
-def update_soil_min(value: int) -> None:
+def update_threshold(value: int) -> None:
     with get_connection() as connection:
         connection.execute(
-            "UPDATE settings SET soil_moisture_min = ?, "
+            "UPDATE settings SET threshold = ?, "
             "updated_at = strftime('%Y-%m-%dT%H:%M:%S', 'now') WHERE id = 1",
             (value,)
         )

@@ -44,4 +44,4 @@ def parse_line(line: str) -> Optional[Union[SensorData, PumpState]]:
     return None
 
 def create_setting_message(settings: Settings) -> str:
-    return "msg=" + json.dumps({"threshold": settings.soil_moisture_min}) + "\n"
+    return "msg=" + json.dumps({"threshold": settings.threshold}) + "\n"

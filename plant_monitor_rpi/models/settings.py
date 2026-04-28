@@ -2,5 +2,5 @@ from dataclasses import dataclass
 
 @dataclass
 class Settings:
-    soil_moisture_min: int
+    threshold: int
     updated_at: str

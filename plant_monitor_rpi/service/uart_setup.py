@@ -14,4 +14,4 @@ def sync_setting() -> None:
     msg = protocol.create_setting_message(settings)
     uart_listener.get_port().write(msg)
 
-    logger.info("초기 설정값 동기화 완료: soil_moisture_min=%d%%", settings.soil_moisture_min)
+    logger.info("초기 설정값 동기화 완료: threshold=%d%%", settings.threshold)

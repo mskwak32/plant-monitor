@@ -1,0 +1,147 @@
+/* 전체 기본 스타일 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: #f0f4f0;
+    color: #222;
+    padding: 16px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+#connection-status {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+#connection-status.connected {
+    color: #2e7d32;
+}
+
+#connection-status.disconnected {
+    color: #c62828;
+}
+
+/* 카드 공통 */
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+/* 센서 그리드 */
+.sensor-grid {
+    display: flex;
+    gap: 16px;
+}
+
+.sensor-item {
+    flex: 1;
+    text-align: center;
+}
+
+.sensor-item .label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.sensor-item .value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.sensor-item .unit {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.last-updated {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+}
+
+/* 설정 카드 */
+.setting-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.setting-row label {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.setting-row input[type="number"] {
+    width: 70px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+} 
+
+/* 버튼 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-save {
+    background-color: #2e7d32;
+    color: #fff;
+}
+
+.btn-save:hover {
+    background-color: #1b5e20;
+}
+
+/* 펌프 로그 */
+#pump-log-list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#pump-log-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+    color: #444;
+}
+
+#pump-log-list li:last-child {
+    border-bottom: none;
+}
