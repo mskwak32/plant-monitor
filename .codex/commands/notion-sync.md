@@ -7,13 +7,6 @@ Sync user-specified markdown files from the plant-monitor project to Notion.
   - Weeks 1-7 -> child page under STM32 parent `3386e29b-97d5-80dd-8546-f9877e9f82f3`.
   - Weeks 8+ -> child page under RPi parent `3386e29b-97d5-8085-96c7-df544d93f3cf`.
 
-## State
-
-- Read `{project_root}/.agent/notion_sync_state.json`.
-- Use an empty state if the file does not exist.
-- Store `notion_page_id` for weekly files after create/update.
-- `system_architecture.md` uses the fixed page ID above.
-
 ## Preprocess
 
 - Remove the body h1 and use it only as the Notion title.
@@ -37,22 +30,23 @@ Sync user-specified markdown files from the plant-monitor project to Notion.
 4. Stop and ask which file to sync if the user did not specify a supported target.
 5. Skip a specified target if the source file does not exist.
 6. Print the candidate list before any Notion create/update call.
-7. Print the skip list for visibility.
+7. Do not print a skip list unless the user asks for it.
 8. Ask the user whether to proceed with the candidate sync.
-9. Stop without calling Notion or writing the state file unless the user explicitly approves.
+9. Stop without calling Notion unless the user explicitly approves.
 10. Preprocess candidate files only after approval.
 11. Update page `3386e29b-97d5-814b-96f0-e5e4515e58c7` when `system_architecture.md` is a candidate.
 12. For each weekly candidate, preprocess the file and build the page title as `N주차 — ...`.
-13. Update the existing weekly page when `notion_page_id` exists.
-14. Create a new weekly child page under the correct weekly parent when `notion_page_id` does not exist: weeks 1-7 use STM32 parent, weeks 8+ use RPi parent.
-15. Save `notion_page_id` for each successfully synced weekly file.
-16. Write the state file after all approved work finishes.
+13. Use `mcp__codex_apps__notion_fetch` to look for an existing weekly child page with the same title under the correct weekly parent: weeks 1-7 use STM32 parent, weeks 8+ use RPi parent.
+14. Update the existing weekly page when exactly one matching child page is found.
+15. Create a new weekly child page under the correct weekly parent when no matching child page is found.
+16. Stop and ask the user which page to use if multiple matching weekly child pages are found.
 
 ## Rules
 
 - Sync only files explicitly specified by the user.
 - Do not expand the sync scope unless the user asks.
-- Do not create a new page when `notion_page_id` already exists.
+- Do not read from or write to `.agent/notion_sync_state.json`.
+- Do not create a new weekly page when a matching child page already exists under the expected parent.
 - Do not change page title or parent location unless required for sync.
-- Do not call Notion or write the state file before the user approves the printed candidate list.
+- Do not call Notion before the user approves the printed candidate list.
 - Continue with other files even if one file fails.
