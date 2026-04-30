@@ -7,6 +7,14 @@ const elThreshold = document.getElementById("threshold");
 const elSaveBtn = document.getElementById("btn-save-settings");
 const elLogList = document.getElementById("pump-log-list");
 const elPumpState = document.getElementById("pump-state");
+const elChartSoil = document.getElementById("chart-soil");
+const elChartTemp = document.getElementById("chart-temp");
+const elChartHumidity = document.getElementById("chart-humidity");
+const elRefreshPumpLogBtn = document.getElementById("btn-refresh-pump-logs");
+
+const chartSoil = createChart(elChartSoil, "토양 수분 (%)", "#2e7d32");
+const chartTemp = createChart(elChartTemp, "온도 (°C)", "#1565c0");
+const chartHumidity = createChart(elChartHumidity, "습도 (%)", "#6a1b9a");
 
 // 페이지 로드 시 초기 데이터 fetch
 async function loadSettings() {
@@ -50,10 +58,16 @@ function connectSSE() {
         const data = JSON.parse(event.data);
 
         if (data.type == TYPE_SENSOR_DATA) {
+            const time = new Date().toLocaleTimeString("ko-KR");
+
             elSoil.textContent = data.soil_moisture_pct ?? "--";
             elTemp.textContent = data.air_temperature ?? "--";
             elHumidity.textContent = data.air_humidity ?? "--"
-            elLastUpdated.textContent = new Date().toLocaleTimeString("ko-KR");
+            elLastUpdated.textContent = time
+            
+            addDataPoint(chartSoil, time, data.soil_moisture_pct);
+            addDataPoint(chartTemp, time, data.air_temperature);
+            addDataPoint(chartHumidity, time, data.air_humidity);
         } else if (data.type == TYPE_PUMP_STATE) {
             elPumpState.textContent = PUMP_LABEL[data.state] ?? data.state;
             elPumpState.className = PUMP_CLASS_MAP[data.state] ?? "";
@@ -93,6 +107,12 @@ elSaveBtn.addEventListener("click", async () => {
         body: JSON.stringify({ threshold: value })
     });
     showToast("저장하였습니다.")
+});
+
+// 펌프 이력 갱신 버튼
+elRefreshPumpLogBtn.addEventListener("click", () => {
+    elLogList.innerHTML = "";
+    loadPumpLogs();
 });
 
 loadSettings();

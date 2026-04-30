@@ -52,6 +52,31 @@ main {
     margin-bottom: 16px;
 }
 
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-header h2 {
+    margin-bottom: 0;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #888;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.btn-icon:hover {
+    color: #2e7d32;
+    background-color: #f0f4f0;
+}
+
 /* 센서 그리드 */
 .sensor-grid {
     display: flex;
@@ -187,4 +212,14 @@ main {
 
 .toast.hide {
     opacity: 0;
+}
+
+.chart-wrap {
+    position: relative;
+    height: 160px;
+    margin-bottom: 24px;
+}
+
+.chart-wrap:last-child {
+    margin-bottom: 0;
 }

@@ -36,6 +36,20 @@
                 <p class="last-updated">마지막 갱신: <span id="last-updated">--</span></p>
              </section>
 
+             <!-- 센서 그래프 카드 -->
+              <section class="card" id="chart-card">
+                <h2>센서 그래프</h2>
+                <div class="chart-wrap">
+                    <canvas id="chart-soil"></canvas>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="chart-temp"></canvas>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="chart-humidity"></canvas>
+                </div>
+              </section>
+
              <!-- 자동화 설정 카드 -->
               <section class="card" id="setting-card">
                 <h2>자동화 설정</h2>
@@ -49,7 +63,10 @@
 
               <!-- 펌프 로그 카드 -->
                <section class="card" id="pump-log-card">
-                <h2>펌프 로그</h2>
+                <div class="card-header">
+                    <h2>펌프 로그</h2>
+                    <button id="btn-refresh-pump-logs" class="btn-icon" title="새로고침">🔄</button>
+                </div>
                 <p class="pump-state">현재 상태: <span id="pump-state">--</span></p>
                 <ul id="pump-log-list">
                     <!-- app.js가 GET /pump/logs 응답을 여기에 <li>로 추가 -->
@@ -58,8 +75,10 @@
         </main>
 
         <div id="toast-container"></div>
-        
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/static/constants.js"></script>
+        <script src="/static/sensor_chart.js"></script>
         <script src="/static/app.js"></script>
     </body>
 </html>
