@@ -66,6 +66,24 @@ function connectSSE() {
     };
 }
 
+/**
+ * @param {string} message 
+ */
+function showToast(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    document.getElementById("toast-container").appendChild(toast);
+
+    // 2s 뒤 fadeOut
+    setTimeout(() => {
+        toast.classList.add("hide");
+
+        // fadeOut 끝난 뒤 DOM에서 제거
+        toast.addEventListener("transitionend", () => toast.remove());
+    }, 2000)
+}
+
 // 저장 버튼
 elSaveBtn.addEventListener("click", async () => {
     const value = parseInt(elThreshold.value, 10);
@@ -74,6 +92,7 @@ elSaveBtn.addEventListener("click", async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ threshold: value })
     });
+    showToast("저장하였습니다.")
 });
 
 loadSettings();
