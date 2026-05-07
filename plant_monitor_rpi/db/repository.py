@@ -49,6 +49,6 @@ def update_threshold(value: int) -> None:
     with get_connection() as connection:
         connection.execute(
             "UPDATE settings SET threshold = ?, "
-            "updated_at = strftime('%Y-%m-%dT%H:%M:%S', 'now') WHERE id = 1",
+            "updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = 1",
             (value,)
         )

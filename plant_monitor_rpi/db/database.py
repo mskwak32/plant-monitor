@@ -13,7 +13,7 @@ def init_db():
         connection.executescript("""
                                  CREATE TABLE IF NOT EXISTS sensor_logs(
                                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                     timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%S', 'now')),
+                                     timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
                                      soil_moisture_pct INTEGER,
                                      air_humidity REAL,
                                      air_temperature REAL
@@ -21,14 +21,14 @@ def init_db():
                                  
                                  CREATE TABLE IF NOT EXISTS pump_logs(
                                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                     timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%S', 'now')),
+                                     timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
                                      action TEXT NOT NULL
                                  );
                                  
                                  CREATE TABLE IF NOT EXISTS settings(
                                      id INTEGER PRIMARY KEY CHECK (id = 1),
                                      threshold INTEGER NOT NULL DEFAULT 30,
-                                     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%S', 'now'))
+                                     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
                                  );
                                  
                                  INSERT OR IGNORE INTO settings (id, threshold) VALUES (1, 30);

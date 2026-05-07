@@ -1,4 +1,3 @@
-const elStatus = document.getElementById("connection-status");
 const elSoil = document.getElementById("soil-moisture");
 const elTemp = document.getElementById("temperature");
 const elHumidity = document.getElementById("humidity");
@@ -16,23 +15,6 @@ const chartSoil = createChart(elChartSoil, "토양 수분 (%)", "#2e7d32");
 const chartTemp = createChart(elChartTemp, "온도 (°C)", "#1565c0");
 const chartHumidity = createChart(elChartHumidity, "습도 (%)", "#6a1b9a");
 
-// 페이지 로드 시 초기 데이터 fetch
-async function loadSettings() {
-    const res = await fetch("/settings");
-    const data = await res.json();
-    elThreshold.value = data.threshold;
-}
-
-async function loadPumpLogs() {
-    const res = await fetch("/pump/logs");
-    const logs = await res.json();
-    logs.forEach(log => {
-        const li = document.createElement("li");
-        li.textContent = `${log.timestamp} - ${log.action}`;
-        elLogList.appendChild(li);
-    });
-}
-
 const PUMP_LABEL = {
     [PUMP_IDLE]:    "대기 중",
     [PUMP_PUMPING]: "급수 중",
@@ -45,14 +27,28 @@ const PUMP_CLASS_MAP = {
     [PUMP_SOAKING]: "soaking",
 };
 
+// 페이지 로드 시 초기 데이터 fetch
+async function loadSettings() {
+    const res = await fetch("/settings");
+    const data = await res.json();
+    elThreshold.value = data.threshold;
+}
+
+async function loadPumpLogs() {
+    const res = await fetch("/pump/logs");
+    const logs = await res.json();
+    logs.forEach(log => {
+        const li = document.createElement("li");
+        const localTime = new Date(log.timestamp).toLocaleString("ko-KR");
+        const label = PUMP_LABEL[log.action] ?? log.action;
+        li.textContent = `${localTime} - ${label}`;
+        elLogList.appendChild(li);
+    });
+}
+
 // SSE 연결
 function connectSSE() {
     const es = new EventSource("/stream");
-
-    es.onopen = () => {
-        elStatus.textContent = "SSE 연결됨";
-        elStatus.className = "connected";
-    };
 
     es.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -74,10 +70,6 @@ function connectSSE() {
         }
     };
 
-    es.onerror = () => {
-        elStatus.textContent = "SSE 연결 끊김";
-        elStatus.className = "disconnected";
-    };
 }
 
 /**

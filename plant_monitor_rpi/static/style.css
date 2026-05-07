@@ -19,18 +19,6 @@ header {
     margin-bottom: 24px;
 }
 
-#connection-status {
-    font-size: 0.85rem;
-    color: #888;
-}
-
-#connection-status.connected {
-    color: #2e7d32;
-}
-
-#connection-status.disconnected {
-    color: #c62828;
-}
 
 /* 카드 공통 */
 main {
