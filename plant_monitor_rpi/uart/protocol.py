@@ -59,5 +59,5 @@ def parse_line(line: str) -> Optional[Union[SensorData, PumpState, ReadySignal]]
 def create_setting_message(settings: Settings) -> str:
     return "msg=" + json.dumps({"threshold": settings.threshold}) + "\n"
 
-def create_ping_message() -> str:
+def get_ping_message() -> str:
     return "msg={\"type\":\"ping\"}\n"

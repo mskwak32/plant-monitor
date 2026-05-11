@@ -6,7 +6,7 @@ import time
 import serial
 
 from db import repository
-from uart.protocol import parse_line, create_ping_message, ReadySignal
+from uart.protocol import parse_line, get_ping_message, ReadySignal
 from models.sensor_data import SensorData
 from models.pump_state import PumpState
 from uart.serial_port import SerialPort, DEFAULT_PORT
@@ -15,6 +15,7 @@ from typing import Optional, Callable
 logger = logging.getLogger(__name__)
 
 _RETRY_INTERVAL = 10     # STM32 없을 때 재시도 간격(초)
+_PING_RETRY_INTERVAL = 3    # ping 재시도 간격
 
 _current_port: Optional[SerialPort] = None
 _on_connected: Optional[Callable] = None        #연결완료 콜백
@@ -36,7 +37,7 @@ def _read_loop(queue: asyncio.Queue,loop: asyncio.AbstractEventLoop) -> None:
             logger.info("STM32 연결됨 (%s)", port.port_name)
             
             time.sleep(1)
-            port.write(create_ping_message())
+            port.write(get_ping_message())
             logger.info("ping 전송")
         
         except (serial.SerialException, FileNotFoundError):
@@ -44,11 +45,19 @@ def _read_loop(queue: asyncio.Queue,loop: asyncio.AbstractEventLoop) -> None:
             time.sleep(_RETRY_INTERVAL)
             continue
         
+        _synced = False
+        _last_ping = time.time()
+        
         # 연결된 상태에서 데이터 읽기
         try:
             while True:
                 line = port.readline()
                 if not line:
+                    # stm32에서 발송하는 ready 미수신 상태면 주기적으로 ping 재전송
+                    if not _synced and time.time() - _last_ping >= _PING_RETRY_INTERVAL:
+                        port.write(get_ping_message())
+                        logger.info("ping 재전송")
+                        _last_ping = time.time()
                     continue
         
                 parsed = parse_line(line)
@@ -57,17 +66,20 @@ def _read_loop(queue: asyncio.Queue,loop: asyncio.AbstractEventLoop) -> None:
                 
                 if isinstance(parsed, ReadySignal):
                     logger.info("STM32 ready 수신")
+                    _synced = True
                     if _on_connected:
                         try:
                             _on_connected()
                         except Exception:
                             logger.exception("on_connected 콜백 실패")
                     continue
+                
                 elif isinstance(parsed, SensorData):
                     try:
                         repository.insert_sensor(parsed)
                     except Exception:
                         logger.exception("sensor DB 저장 실패")
+                        
                 elif isinstance(parsed, PumpState):
                     try:
                         repository.insert_pump(parsed)
