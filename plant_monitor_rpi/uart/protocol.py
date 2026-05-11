@@ -8,6 +8,8 @@ from models.pump_state import PumpState, PUMP_IDLE, PUMP_PUMPING, PUMP_SOAKING, 
 # STM32 UART 메시지 필드명
 _TYPE_SENSOR_DATA       = "sensor_data"
 _TYPE_WATERPUMP         = "water_pump"
+_TYPE_READY             = "ready"
+_TYPE_PING              = "ping"
 _DATA_SOIL_MOISTURE_PCT = "soil_moisture_pct"
 _DATA_AIR_TEMPERATURE   = "air_temperature"
 _DATA_AIR_HUMIDITY      = "air_humidity"
@@ -24,22 +26,30 @@ _PUMP_STATE_MAP = {
     _PUMP_RAW_SOAKING: PUMP_SOAKING,
 }
 
+class ReadySignal:
+    pass
+
 logger = logging.getLogger(__name__)
 
-def parse_line(line: str) -> Optional[Union[SensorData, PumpState]]:
+def parse_line(line: str) -> Optional[Union[SensorData, PumpState, ReadySignal]]:
     if not line.startswith("msg="):
         return None
     try:
         payload = json.loads(line[4:])
         msg_type = payload.get("type")
-        data = payload.get("data", {})
-        if msg_type == _TYPE_SENSOR_DATA:
+        
+        if msg_type == _TYPE_READY:
+            return ReadySignal()
+        
+        elif msg_type == _TYPE_SENSOR_DATA:
+            data = payload.get("data", {})
             return SensorData(
                 soil_moisture_pct=data.get(_DATA_SOIL_MOISTURE_PCT),
                 air_temperature=data.get(_DATA_AIR_TEMPERATURE),
                 air_humidity=data.get(_DATA_AIR_HUMIDITY)
             )
-        if msg_type == _TYPE_WATERPUMP:
+        elif msg_type == _TYPE_WATERPUMP:
+            data = payload.get("data", {})
             raw = data.get(_DATA_WATERPUMP_STATE, PUMP_UNKNOWN)
             return PumpState(state=_PUMP_STATE_MAP.get(raw, PUMP_UNKNOWN))
     except (json.JSONDecodeError, KeyError):
@@ -48,3 +58,6 @@ def parse_line(line: str) -> Optional[Union[SensorData, PumpState]]:
 
 def create_setting_message(settings: Settings) -> str:
     return "msg=" + json.dumps({"threshold": settings.threshold}) + "\n"
+
+def create_ping_message() -> str:
+    return "msg={\"type\":\"ping\"}\n"

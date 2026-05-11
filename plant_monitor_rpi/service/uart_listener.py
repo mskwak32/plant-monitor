@@ -6,7 +6,7 @@ import time
 import serial
 
 from db import repository
-from uart.protocol import parse_line
+from uart.protocol import parse_line, create_ping_message, ReadySignal
 from models.sensor_data import SensorData
 from models.pump_state import PumpState
 from uart.serial_port import SerialPort, DEFAULT_PORT
@@ -35,11 +35,9 @@ def _read_loop(queue: asyncio.Queue,loop: asyncio.AbstractEventLoop) -> None:
             _current_port = port
             logger.info("STM32 연결됨 (%s)", port.port_name)
             
-            if _on_connected:
-                try:
-                    _on_connected()
-                except Exception:
-                    logger.exception("on_connected 콜백 실패")
+            time.sleep(1)
+            port.write(create_ping_message())
+            logger.info("ping 전송")
         
         except (serial.SerialException, FileNotFoundError):
             logger.info("STM32 없음, %d초 후 재시도...", _RETRY_INTERVAL)
@@ -56,8 +54,16 @@ def _read_loop(queue: asyncio.Queue,loop: asyncio.AbstractEventLoop) -> None:
                 parsed = parse_line(line)
                 if parsed is None:
                     continue
-        
-                if isinstance(parsed, SensorData):
+                
+                if isinstance(parsed, ReadySignal):
+                    logger.info("STM32 ready 수신")
+                    if _on_connected:
+                        try:
+                            _on_connected()
+                        except Exception:
+                            logger.exception("on_connected 콜백 실패")
+                    continue
+                elif isinstance(parsed, SensorData):
                     try:
                         repository.insert_sensor(parsed)
                     except Exception:

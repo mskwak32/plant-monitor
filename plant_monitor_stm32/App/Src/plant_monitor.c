@@ -32,6 +32,7 @@ void PlantMonitor_Init(
     );
     OledDisplay_Init(hi2c);
     UartCmd_Init(&uart_handle, huart);
+    printf("msg={\"type\":\"ready\"}\r\n");
 }
 
 void PlantMonitor_Run(void) {
@@ -68,6 +69,8 @@ static void PlantMonitor_HandleUartCmd(void) {
                         printf("Invalid threshold: %d\r\n", val);
                     }
                 }
+            } else if(strstr(json, "\"type\"") && strstr(json, "\"ping\"")) {
+                printf("msg={\"type\":\"ready\"}\r\n");
             }
         }
     }
