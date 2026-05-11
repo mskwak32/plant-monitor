@@ -16,9 +16,7 @@ async def lifespan(app: FastAPI):
     init_db()
     queue: asyncio.Queue = asyncio.Queue()
     uart_listener.start(queue)
-
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, uart_setup.sync_setting)
+    uart_setup.sync_setting()
 
     app.state.queue = queue
     
