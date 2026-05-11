@@ -13,3 +13,7 @@ $RECYCLE.BIN/
 .DS_Store
 .vscode/
 .claude/settings.local.json
+
+# Video files (too large for GitHub)
+*.mp4
+*.mov

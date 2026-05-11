@@ -3,6 +3,9 @@
 STM32 마이크로컨트롤러와 라즈베리파이5를 연동한 임베디드 풀스택 포트폴리오 프로젝트입니다.  
 토양 수분과 온습도를 실시간으로 측정하고, 임계값 기반 자동 급수와 웹 대시보드 원격 모니터링을 구현합니다.
 
+<!-- 시연 영상: YouTube 업로드 후 아래 ID 교체 -->
+<!-- [![시연 영상](https://img.youtube.com/vi/<영상ID>/0.jpg)](https://www.youtube.com/watch?v=<영상ID>) -->
+
 ![웹 대시보드](images/웹%20대시보드%20스크린샷.png)
 
 ---
@@ -57,6 +60,19 @@ flowchart TD
 | 릴레이 | 5V 1채널 (JQC-3FF-S-Z 기반) | GPIO |
 | 워터펌프 | DC 12V 수중펌프 | — (릴레이 스위칭) |
 | 서버 | 라즈베리파이5 8GB | UART (USB) |
+
+### 하드웨어 사진
+
+<table>
+  <tr>
+    <td align="center"><img src="images/전체사진.jpg" width="320"><br>전체 구성</td>
+    <td align="center"><img src="images/라즈베리파이 및 stm32.jpg" width="320"><br>라즈베리파이5 + STM32</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/oled.jpg" width="320"><br>OLED 표시</td>
+    <td align="center"><img src="images/모터와 화분.jpg" width="320"><br>워터펌프 + 화분</td>
+  </tr>
+</table>
 
 ---
 
