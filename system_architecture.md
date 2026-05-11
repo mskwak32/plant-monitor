@@ -187,7 +187,7 @@ plant_monitor_rpi/
 │   └── pump_state.py        # PumpState dataclass, 정규화 상태 상수 (IDLE/PUMPING/SOAKING)
 ├── uart/
 │   ├── serial_port.py       # 시리얼 포트 열기/읽기/쓰기, port_name 프로퍼티
-│   └── protocol.py          # STM32 msg= 파싱 → 내부 모델 변환, create_setting_message
+│   └── protocol.py          # STM32 msg= 파싱 → 내부 모델 변환, create_setting_message, get_ping_message, ReadySignal
 ├── db/
 │   ├── database.py          # SQLite 연결, 테이블 생성
 │   └── repository.py        # sensor_logs / pump_logs / settings CRUD
@@ -213,8 +213,8 @@ plant_monitor_rpi/
 | Transport | `uart/serial_port.py` | 시리얼 포트 하드웨어만 담당, 파싱 없음 |
 | Protocol | `uart/protocol.py` | STM32 raw 메시지 → 내부 모델 변환 |
 | Persistence | `db/repository.py` | DB CRUD, SQL 쿼리를 여기서만 씀 |
-| Service | `service/uart_listener.py` | Transport + Protocol + Persistence 조립, Queue 발행 |
-| Service | `service/uart_setup.py` | 서버 시작 시 threading.Event로 STM32 연결 대기 후 초기값 전송 |
+| Service | `service/uart_listener.py` | Transport + Protocol + Persistence 조립, Queue 발행, ping/ready handshake, ping 재전송 |
+| Service | `service/uart_setup.py` | `_on_connected` 콜백 등록 — ready 수신 시 임계값 동기화 실행 |
 | API | `api/*.py` | HTTP 요청 처리, 내부 모델 → 웹 프로토콜 직렬화 |
 
 ---
@@ -256,9 +256,15 @@ msg={"type":"sensor_data","data":{"soil_moisture_pct":55,"air_temperature":22.5,
 msg={"type":"water_pump","data":{"state":"WATER_PUMP_PUMPING"}}
 ```
 
+**준비 완료** — 부팅 완료 시 1회 전송, ping 수신 시 응답 (`plant_monitor`에서 printf):
+
+```
+msg={"type":"ready"}
+```
+
 | 필드 | 타입 | 설명 |
 | ---- | ---- | ---- |
-| `type` | 문자열 | 메시지 종류 (`"sensor_data"` / `"water_pump"`) |
+| `type` | 문자열 | 메시지 종류 (`"sensor_data"` / `"water_pump"` / `"ready"`) |
 | `data.soil_moisture_pct` | 정수 또는 `null` | 토양 수분 (%) — 센서 읽기 실패 시 `null` |
 | `data.air_temperature` | 소수점 1자리 또는 `null` | 온도 (°C) — 센서 읽기 실패 시 `null` |
 | `data.air_humidity` | 소수점 1자리 또는 `null` | 공기 습도 (%) — 센서 읽기 실패 시 `null` |
@@ -266,13 +272,40 @@ msg={"type":"water_pump","data":{"state":"WATER_PUMP_PUMPING"}}
 
 ### RPi5 → STM32
 
+**임계값 설정**:
+
 ```
 msg={"threshold":30}
+```
+
+**ping** — 연결 직후 전송, ready 미수신 시 3초마다 재전송:
+
+```
+msg={"type":"ping"}
 ```
 
 | 필드 | 타입 | 설명 |
 | ---- | ---- | ---- |
 | `threshold` | 정수 (0~100) | 토양 수분 임계값 (%) |
+| `type` | 문자열 | `"ping"` — STM32에 ready 응답 요청 |
+
+### 연결 동기화 handshake
+
+STM32 재연결 시 임계값을 동기화하기 위한 handshake 흐름:
+
+```
+RPi 연결 후 1초 대기
+  → RPi: ping 전송
+  → STM32 ready 수신까지 3초마다 ping 재전송
+
+STM32 부팅 완료 (PlantMonitor_Init 완료)
+  → STM32: ready 전송
+  → (ping 수신 시에도 ready 응답)
+
+RPi: ready 수신 → 임계값 동기화 실행
+```
+
+이 방식으로 서버 재시작 · STM32 리셋 · USB 재연결 세 케이스를 모두 처리한다.
 
 ---
 
