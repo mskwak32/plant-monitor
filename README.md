@@ -3,7 +3,9 @@
 STM32 마이크로컨트롤러와 라즈베리파이5를 연동한 임베디드 풀스택 포트폴리오 프로젝트입니다.  
 토양 수분과 온습도를 실시간으로 측정하고, 임계값 기반 자동 급수와 웹 대시보드 원격 모니터링을 구현합니다.
 
-[![시연 영상](https://img.youtube.com/vi/4Bd6sCmrHr0/0.jpg)](https://youtu.be/4Bd6sCmrHr0)
+▶ 아래 이미지를 클릭하면 시연 영상을 볼 수 있습니다.
+
+[![시연 영상 보기](https://img.youtube.com/vi/4Bd6sCmrHr0/0.jpg)](https://youtu.be/4Bd6sCmrHr0)
 
 ![웹 대시보드](images/웹%20대시보드%20스크린샷.png)
 
